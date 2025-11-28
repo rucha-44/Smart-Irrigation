@@ -1,0 +1,11 @@
+flask
+pandas
+numpy
+scikit-learn
+tensorflow
+requests
+joblib
+matplotlib
+seaborn
+torch
+pytorch-tabnet

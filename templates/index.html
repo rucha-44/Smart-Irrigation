@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Irrigation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .impact-bar { height: 10px; border-radius: 5px; }
+        .crop-fact-card { border-left: 5px solid #2ecc71; background-color: #f0fff4; }
+        .unit-badge { font-size: 0.6em; vertical-align: super; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid main-container">
+        <div class="row h-100">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar p-4 text-white">
+                <h3><i class="fas fa-seedling"></i> Smart Irrigate</h3>
+                <p class="mt-3">AI-Powered Precision Farming</p>
+                <hr>
+                
+                <!-- Weather Section -->
+                <div class="weather-card mt-4 p-3 rounded">
+                    <h5><i class="fas fa-cloud-sun"></i> Live Weather</h5>
+                    <div class="input-group mb-2">
+                        <input type="text" id="cityInput" class="form-control" placeholder="Enter City">
+                        <button class="btn btn-light" onclick="fetchWeather()"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div id="weatherDisplay" class="d-none">
+                        <h2 id="wTemp">--°C</h2>
+                        <p id="wCond" class="text-uppercase fw-bold">--</p>
+                        <small><i class="fas fa-tint"></i> Hum: <span id="wHum">--</span>%</small>
+                        <small class="ms-2"><i class="fas fa-wind"></i> Wind: <span id="wWind">--</span>km/h</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 content p-5">
+                
+                <!-- Input Form -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h4 class="mb-4 text-primary"><i class="fas fa-sliders-h"></i> Field Parameters</h4>
+                                <form id="predictForm">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="fw-bold">Crop Selection</label>
+                                            <select class="form-select" id="crop_type">
+                                                {% for opt in options['CROP_TYPE'] %}
+                                                <option value="{{opt}}">{{opt}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="fw-bold">Soil Type</label>
+                                            <select class="form-select" id="soil_type">
+                                                {% for opt in options['SOIL_TYPE'] %}
+                                                <option value="{{opt}}">{{opt}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="fw-bold">Region</label>
+                                            <select class="form-select" id="region">
+                                                {% for opt in options['REGION'] %}
+                                                <option value="{{opt}}">{{opt}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="fw-bold">Current Soil Moisture (0-100)</label>
+                                            <input type="number" class="form-control border-primary" id="soil_moisture" value="45">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Hidden Weather Inputs -->
+                                    <input type="hidden" id="temperature"><input type="hidden" id="humidity">
+                                    <input type="hidden" id="rainfall"><input type="hidden" id="wind_speed">
+                                    <input type="hidden" id="weather_condition">
+
+                                    <div class="mt-4 text-end">
+                                        <button type="button" class="btn btn-success btn-lg px-5" onclick="runAnalysis()">
+                                            <i class="fas fa-check-circle"></i> Analyze & Forecast
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- 4-Day Forecast Table (Hidden Initially) -->
+                        <div id="forecastPanel" class="card shadow-sm d-none mb-4">
+                            <div class="card-header bg-dark text-white">
+                                <i class="fas fa-calendar-alt"></i> Future Irrigation Plan (4-Day)
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Forecast</th>
+                                            <th>Temp</th>
+                                            <th>Decision</th>
+                                            <th>Water Qty <small class="text-muted">(L/m²)</small></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="forecastTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Results & Visualization -->
+                    <div class="col-lg-4">
+                        <!-- Result Card -->
+                        <div class="card shadow-sm h-100 bg-white" id="resultCard" style="display:none;">
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <div id="statusIcon" style="font-size: 4rem;"></div>
+                                    <h3 id="statusText" class="fw-bold mt-2"></h3>
+                                    
+                                    <!-- IMPROVED UNIT DISPLAY -->
+                                    <h4 class="text-primary mt-2">
+                                        <i class="fas fa-fill-drip"></i> 
+                                        <span id="resAmount" class="display-6 fw-bold"></span> 
+                                        <span class="fs-6 text-muted">Liters / m²</span>
+                                    </h4>
+                                    <small class="text-muted">(Equivalent to mm of rain)</small>
+                                </div>
+                                
+                                <!-- Crop Fact Card -->
+                                <div class="card crop-fact-card mb-3">
+                                    <div class="card-body p-2">
+                                        <small class="text-success fw-bold">CROP INSIGHT:</small><br>
+                                        <small id="cropFactText" class="text-muted"></small>
+                                    </div>
+                                </div>
+
+                                <!-- Visual Impact Bars (The "Why") -->
+                                <h6 class="fw-bold mt-4">Decision Factors:</h6>
+                                
+                                <div class="d-flex justify-content-between small">
+                                    <span class="text-muted">Heat Stress</span>
+                                    <span class="text-danger fw-bold" id="lblTemp"></span>
+                                </div>
+                                <div class="progress mb-2" style="height: 6px;">
+                                    <div id="barTemp" class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+                                </div>
+
+                                <div class="d-flex justify-content-between small">
+                                    <span class="text-muted">Soil Dryness</span>
+                                    <span class="text-warning fw-bold" id="lblMoist"></span>
+                                </div>
+                                <div class="progress mb-2" style="height: 6px;">
+                                    <div id="barMoist" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                                </div>
+
+                                <div class="d-flex justify-content-between small">
+                                    <span class="text-muted">Rainfall Offset</span>
+                                    <span class="text-info fw-bold" id="lblRain"></span>
+                                </div>
+                                <div class="progress mb-2" style="height: 6px;">
+                                    <div id="barRain" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                
+                                <div class="alert alert-light border mt-3 small" id="resAdvice"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchWeather() {
+            const city = document.getElementById('cityInput').value;
+            if(!city) return;
+            
+            const btn = document.querySelector('.weather-card button');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const res = await fetch('/get_weather', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({city: city})
+                });
+                const data = await res.json();
+                
+                if(data.error) { alert(data.error); return; }
+
+                document.getElementById('weatherDisplay').classList.remove('d-none');
+                document.getElementById('wTemp').innerText = data.temperature + '°C';
+                document.getElementById('wCond').innerText = data.condition_desc || data.weather_condition;
+                document.getElementById('wHum').innerText = data.humidity;
+                document.getElementById('wWind').innerText = data.wind_speed;
+
+                // Auto-fill hidden inputs
+                document.getElementById('temperature').value = data.temperature;
+                document.getElementById('humidity').value = data.humidity;
+                document.getElementById('rainfall').value = data.rainfall;
+                document.getElementById('wind_speed').value = data.wind_speed;
+                document.getElementById('weather_condition').value = data.weather_condition;
+            } catch(e) { console.error(e); }
+            btn.innerHTML = '<i class="fas fa-search"></i>';
+        }
+
+        async function runAnalysis() {
+            // 1. Check if weather is loaded
+            if(document.getElementById('temperature').value === "") {
+                alert("Please enter a city and click Search to get weather data first!");
+                return;
+            }
+
+            // 2. Prepare Data
+            const baseData = {
+                crop_type: document.getElementById('crop_type').value,
+                soil_type: document.getElementById('soil_type').value,
+                region: document.getElementById('region').value,
+                soil_moisture: document.getElementById('soil_moisture').value,
+                temperature: document.getElementById('temperature').value,
+                humidity: document.getElementById('humidity').value,
+                rainfall: document.getElementById('rainfall').value,
+                wind_speed: document.getElementById('wind_speed').value,
+                weather_condition: document.getElementById('weather_condition').value
+            };
+
+            // 3. Get Main Prediction
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(baseData)
+            });
+            const result = await res.json();
+
+            // 4. Update Result Card & Visualization
+            const card = document.getElementById('resultCard');
+            card.style.display = 'block';
+            
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+            
+            if (result.needs_water) {
+                icon.innerHTML = '<i class="fas fa-tint text-primary fa-beat"></i>';
+                text.innerText = "Irrigate Now";
+                text.className = "fw-bold mt-2 text-primary";
+            } else {
+                icon.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+                text.innerText = "No Action";
+                text.className = "fw-bold mt-2 text-success";
+            }
+
+            document.getElementById('resAmount').innerText = result.water_amount;
+            document.getElementById('resAdvice').innerText = result.advice;
+            document.getElementById('cropFactText').innerText = result.crop_fact;
+
+            // Update Bars and Labels
+            document.getElementById('barTemp').style.width = result.impacts.temp + "%";
+            document.getElementById('lblTemp').innerText = result.impacts.temp + "%";
+            
+            document.getElementById('barMoist').style.width = result.impacts.moisture + "%";
+            document.getElementById('lblMoist').innerText = result.impacts.moisture + "%";
+            
+            document.getElementById('barRain').style.width = result.impacts.rain + "%";
+            document.getElementById('lblRain').innerText = result.impacts.rain + "%";
+
+            // 5. Get Forecast (After main result)
+            fetchForecast(baseData);
+        }
+
+        async function fetchForecast(baseData) {
+            const city = document.getElementById('cityInput').value;
+            
+            const res = await fetch('/predict_forecast', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({city: city, base_inputs: baseData})
+            });
+            const forecasts = await res.json();
+            
+            if(forecasts.error) return;
+
+            const tbody = document.getElementById('forecastTableBody');
+            tbody.innerHTML = '';
+            
+            forecasts.forEach(day => {
+                const row = `<tr>
+                    <td><strong>${day.day}</strong> <br><small class="text-muted">${day.date}</small></td>
+                    <td><i class="fas fa-cloud"></i> ${day.condition}</td>
+                    <td>${day.temp}°C</td>
+                    <td>${day.needs_water ? '<span class="badge bg-danger">Water</span>' : '<span class="badge bg-success">Wait</span>'}</td>
+                    <td class="fw-bold">${day.amount}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+            
+            // Show Forecast Panel
+            document.getElementById('forecastPanel').classList.remove('d-none');
+        }
+    </script>
+</body>
+</html>

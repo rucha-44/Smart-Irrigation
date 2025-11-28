@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+*.pth
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+.DS_Store
