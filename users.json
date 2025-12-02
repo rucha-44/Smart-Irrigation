@@ -1,0 +1,57 @@
+[
+    {
+        "email": "rucha123@gmail.com",
+        "username": "Rucha",
+        "password": "scrypt:32768:8:1$h9Vxp0Y8XI3UHwzB$df20af094759aec097dea07ffa8461373af0d0f60dc3ed0045873db2aafa4a796c594e4bade1b6635c4b8af9dd231a6b97f3ef67667b79d2b34f831f1b65f3fc",
+        "land_area": "",
+        "crops": ""
+    },
+    {
+        "email": "vinni123@gmail.com",
+        "username": "Vinni",
+        "password": "scrypt:32768:8:1$inHRv7q6GlQtJsD8$581c4b1f68a9e8be4ee53eb59343a16689b106420d2c74a5bbe5cd1196626c952ac82b1c53642bae72d4efe8eb23f106f27b2d49a58948951ce9b027df7a88fd",
+        "land_area": "",
+        "crops": ""
+    },
+    {
+        "email": "sejal123@gmail.com",
+        "username": "sejal",
+        "password": "scrypt:32768:8:1$OrYCxJ0UJoV0yb95$88e31b507aa52bcac9bbd194bbf9d77b1d8f406d502e018c454af0c93b835c0b261ab528cfd52c75ec8cafb88c4ba3c54c52094165c303e6a51acfe77292da54",
+        "land_area": "",
+        "crops": ""
+    },
+    {
+        "email": "raj123@gmail.com",
+        "username": "raj",
+        "password": "scrypt:32768:8:1$gzABCMHfW5MKrL8C$b7a19ced182e8fcbcf16f491f0f57a5cca454b5d0aed95658b1237a0d11cf226ffe2f48b9b2bd982f5113eabbcd0c67ab36ba40a645d5d4c8c71bbde1dcf0245",
+        "land_area": "",
+        "crops": ""
+    },
+    {
+        "email": "rucha@gmail.com",
+        "username": "",
+        "password": "scrypt:32768:8:1$5L557T2eE5NNMPt1$2545254cbdfcd8b07f082d09ecf04f54005bd7217ab8ac6fae12af0a4258eaa39233887533950cb0fd2787086bc55d176db684e3d29b4e6999a0427adbe61f74",
+        "land_area": "5",
+        "crops": []
+    },
+    {
+        "email": "tejaswini@gmail.com",
+        "username": "",
+        "password": "scrypt:32768:8:1$ROxAxAA3eYOKRPDP$d0b2fea464049f76a32d6e243ddeec9c8daec0c689e4e5967f845e49741d9a1236164cb79839ee9c2d47c43bd8fccead2da4813906e14cb29f9e0de40ed761ac",
+        "land_area": "1",
+        "crops": [
+            "Rice",
+            "Sugarcane",
+            "Cotton"
+        ]
+    },
+    {
+        "email": "Ruchamusale@gmail.com",
+        "username": "",
+        "password": "scrypt:32768:8:1$aaSsLkc7CExTnwmJ$4c5e4df9fb743ca2ce0f6ef507ae6c48cca18c56f845d195e8363b34667cd1e9a921e3e571fcc03442c0ecc64adb72603b95c6a4933520c37c11c4a73c8411f6",
+        "land_area": "3",
+        "crops": [
+            "Rice"
+        ]
+    }
+]

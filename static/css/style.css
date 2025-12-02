@@ -49,3 +49,174 @@ body {
 .btn-success:hover {
     background-color: #27ae60;
 }
+
+
+.auth-container {
+    width: 100%;
+    max-width: 420px;
+    margin: 60px auto;
+    background: #ffffff;
+    padding: 35px 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-top: 5px solid #2ecc71;
+}
+
+.auth-container h2 {
+    text-align: center;
+    color: #2ecc71;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.auth-container label {
+    font-weight: 600;
+    margin-top: 10px;
+    color: #333;
+}
+
+.auth-container input {
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding-left: 12px;
+    width: 100%;         /* NEW */
+    display: block;      /* NEW */
+}
+
+.auth-container input:focus {
+    border-color: #2ecc71;
+    box-shadow: 0 0 4px rgba(46,204,113,0.4);
+}
+
+.auth-btn {
+    width: 100%;
+    height: 45px;
+    background: #2ecc71;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    color: white;
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.auth-btn:hover {
+    background: #27ae60;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-links a {
+    color: #2ecc71;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+/* ===========================================
+   FIXED FORM ALIGNMENT (important!)
+   =========================================== */
+
+.auth-form {
+    width: 100%;
+}
+
+.form-group {
+    width: 100%;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    height: 45px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+/* Responsive */
+@media (max-width: 450px) {
+    .auth-container {
+        margin: 20px;
+        padding: 25px;
+    }
+}
+
+.error-box {
+    background: #ffe6e6;
+    color: #d63031;
+    padding: 10px 12px;
+    border-left: 4px solid #d63031;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.error-icon {
+    font-size: 1.2rem;
+    margin-right: 8px;
+}
+
+.textarea-input {
+    width: 100%;
+    height: 100px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    font-size: 1rem;
+}
+
+.textarea-input:focus {
+    border-color: #2ecc71;
+    box-shadow: 0 0 4px rgba(46,204,113,0.3);
+}
+
+.hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+
+/* ===========================================
+   FULLSCREEN VIDEO BACKGROUND
+   =========================================== */
+
+#bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    filter: brightness(60%);
+}
+
+/* Make cards float above video */
+.auth-container, .profile-container {
+    position: relative;
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(5px);
+}
+

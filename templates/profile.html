@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<video autoplay muted loop id="bg-video">
+    <source src="/static/video/background.mp4" type="video/mp4">
+</video>
+
+<div class="auth-container profile-container">
+    <h2>Farmer Profile</h2>
+
+    {% if message %}
+    <div class="success-box">
+        <span class="success-icon">✔</span> {{ message }}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="auth-form">
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="full_name" value="{{ user.full_name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Land Area (in acres)</label>
+            <input type="text" name="land_area" value="{{ user.land_area }}">
+        </div>
+
+        <div class="form-group">
+            <label>Contact No</label>
+            <input type="text" name="contact" value="{{ user.contact }}">
+        </div>
+
+       <div class="form-group">
+            <label>Crops you produce</label>
+            <textarea name="crops" class="textarea-input">{{ user.crops }}</textarea>
+            <small class="hint">Enter one crop per line.</small>
+        </div>
+
+
+        <button class="auth-btn">Save Profile</button>
+    </form>
+
+    <div class="auth-links">
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+</body>
+</html>
