@@ -5,8 +5,16 @@ import joblib
 import tensorflow as tf
 import os
 from services.weather_service import WeatherService
+import os
+
+from flask import request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+# enable CORS for the app (optional but useful)
+CORS(app)
+
 weather_service = WeatherService()
 
 # Global variables
@@ -187,6 +195,67 @@ def predict():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
+
+from flask import request, jsonify
+from translator import tr
+
+@app.route("/translate_texts", methods=["POST"])
+def translate_texts():
+    data = request.json
+    lang = data.get("lang")
+    texts = data.get("texts", {})
+
+    translated = {}
+    for key, value in texts.items():
+        translated[key] = tr(value, lang)
+
+    return jsonify(translated)
+
+from groq import Groq
+
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+@app.route("/chatbot", methods=["POST"])
+def chatbot():
+    data = request.json or {}
+    user_message = data.get("message", "").strip()
+    history = data.get("history", [])
+
+    if not user_message:
+        return jsonify({"reply": "", "error": "Empty message"}), 400
+
+    system_prompt = (
+        "You are AgriAssist, a friendly agriculture advisor for Indian farmers. "
+        "Use simple language, short sentences, and bullet points. "
+        "Give practical farming steps. "
+        "If needed, ask one clarifying question. "
+        "Do NOT give dangerous chemical pesticide advice."
+    )
+
+    # Build message history
+    messages = [{"role": "system", "content": system_prompt}]
+
+    for msg in history[-6:]:
+        if msg.get("role") in ("user", "assistant"):
+            messages.append({"role": msg["role"], "content": msg["content"]})
+
+    messages.append({"role": "user", "content": user_message})
+
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",   # UPDATED MODEL
+            messages=messages,
+            temperature=0.3,
+            max_tokens=300
+        )
+
+        reply = completion.choices[0].message.content.strip()
+        return jsonify({"reply": reply, "error": None})
+
+    except Exception as e:
+        print("Groq chatbot error:", str(e))
+        return jsonify({"reply": "", "error": str(e)}), 500
+
 
 if __name__ == "__main__":
     load_artifacts()
