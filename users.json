@@ -53,5 +53,15 @@
         "crops": [
             "Rice"
         ]
+    },
+    {
+        "email": "mansichitari26@gmail.com",
+        "username": "",
+        "password": "scrypt:32768:8:1$RfTVHfUxyAjJv26R$5ad3e1863f676e410832b1c9172474acfad0669e611b0e9dd22ecd7a2db96a2fdb9c42385dd8c97eccad715015ccf856db6f977fb5cb9168066ce266ae679209",
+        "land_area": "20",
+        "crops": [
+            "Wheat",
+            "Rice"
+        ]
     }
 ]

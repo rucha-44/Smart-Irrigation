@@ -10,8 +10,15 @@ from services.weather_service import WeatherService
 from translator import tr
 from groq import Groq
 from flask_cors import CORS
+from scheduler_controller import scheduler_bp
+
+
 
 app = Flask(__name__)
+weather_service = WeatherService()
+
+# --- Scchedular  ---
+app.register_blueprint(scheduler_bp, url_prefix='/scheduler')
 
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
@@ -356,6 +363,11 @@ def translate_texts():
 
     translated = {key: tr(value, lang) for key, value in texts.items()}
     return jsonify(translated)
+
+@app.route("/planner")
+def planner_page():
+    return render_template("scheduler.html")
+
 
 @app.route("/chatbot", methods=["POST"])
 def chatbot():

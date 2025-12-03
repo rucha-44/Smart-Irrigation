@@ -34,13 +34,18 @@
 <body>
     <div class="container-fluid main-container">
         <div class="row h-100">
-            <!-- Sidebar -->
             <div class="col-md-3 sidebar p-4 text-white">
                 <h3 id="title_smart"><i class="fas fa-seedling"></i> Smart Irrigate</h3>
                 <p id="subtitle_ai" class="mt-3">AI-Powered Precision Farming</p>
                 <hr>
 
-                <!-- Weather Section -->
+                 <div class="d-grid gap-2 mb-4">
+                    <a href="/planner" class="btn btn-outline-light text-start">
+                       <i class="fas fa-calendar-check me-2"></i> Weekly Planner
+                    </a>
+                </div>
+                
+
                 <div class="weather-card mt-4 p-3 rounded">
                     <h5 id="live_weather"><i class="fas fa-cloud-sun"></i> Live Weather</h5>
                     <div class="input-group mb-2">
@@ -55,7 +60,6 @@
                     </div>
                 </div>
 
-                <!-- LANGUAGE SELECTOR CARD -->
                 <div class="mt-4 lang-card">
                     <h5 class="text-white mb-2"><i class="fas fa-language"></i> Language</h5>
                     <select id="languageSelect" class="form-select form-select-sm">
@@ -69,9 +73,7 @@
                 </div>
             </div>
 
-            <!-- Main Content -->
             <div class="col-md-9 content p-5">
-                <!-- Input Form -->
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="card shadow-sm mb-4">
@@ -108,8 +110,7 @@
                                             <input type="number" class="form-control border-primary" id="soil_moisture" value="45">
                                         </div>
                                     </div>
-
-                                    <!-- Hidden Weather Inputs -->
+                                    
                                     <input type="hidden" id="temperature">
                                     <input type="hidden" id="humidity">
                                     <input type="hidden" id="rainfall">
@@ -125,7 +126,6 @@
                             </div>
                         </div>
 
-                        <!-- 4-Day Forecast Table (Hidden Initially) -->
                         <div id="forecastPanel" class="card shadow-sm d-none mb-4">
                             <div id="forecast_title" class="card-header bg-dark text-white">
                                 <i class="fas fa-calendar-alt"></i> Future Irrigation Plan (4-Day)
@@ -147,25 +147,21 @@
                         </div>
                     </div>
 
-                    <!-- Right Panel: Results & Visualization -->
                     <div class="col-lg-4">
-                        <!-- Result Card -->
                         <div class="card shadow-sm h-100 bg-white" id="resultCard" style="display:none;">
                             <div class="card-body">
                                 <div class="text-center mb-4">
                                     <div id="statusIcon" style="font-size: 4rem;"></div>
                                     <h3 id="statusText" class="fw-bold mt-2"></h3>
-
-                                    <!-- IMPROVED UNIT DISPLAY -->
+                                    
                                     <h4 class="text-primary mt-2">
-                                        <i class="fas fa-fill-drip"></i>
-                                        <span id="resAmount" class="display-6 fw-bold"></span>
+                                        <i class="fas fa-fill-drip"></i> 
+                                        <span id="resAmount" class="display-6 fw-bold"></span> 
                                         <span class="fs-6 text-muted">Liters / m²</span>
                                     </h4>
                                     <small class="text-muted">(Equivalent to mm of rain)</small>
                                 </div>
-
-                                <!-- Crop Fact Card -->
+                                
                                 <div class="card crop-fact-card mb-3">
                                     <div class="card-body p-2">
                                         <small class="text-success fw-bold">CROP INSIGHT:</small><br>
@@ -173,9 +169,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Visual Impact Bars (The "Why") -->
                                 <h6 id="decision_factors" class="fw-bold mt-4">Decision Factors:</h6>
-
+                                
                                 <div class="d-flex justify-content-between small">
                                     <span class="text-muted">Heat Stress</span>
                                     <span class="text-danger fw-bold" id="lblTemp"></span>
@@ -199,7 +194,7 @@
                                 <div class="progress mb-2" style="height: 6px;">
                                     <div id="barRain" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
                                 </div>
-
+                                
                                 <div class="alert alert-light border mt-3 small" id="resAdvice"></div>
                             </div>
                         </div>
@@ -207,11 +202,10 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ================= ORIGINAL JS (unchanged) ================= -->
     <script>
+        // --- 1. Fetch Weather ---
         async function fetchWeather() {
             const city = document.getElementById('cityInput').value;
             if(!city) return;
@@ -227,7 +221,7 @@
                 });
                 const data = await res.json();
 
-                if(data.error) { alert(data.error); return; }
+                if(data.error) { alert(data.error); btn.innerHTML = '<i class="fas fa-search"></i>'; return; }
 
                 document.getElementById('weatherDisplay').classList.remove('d-none');
                 document.getElementById('wTemp').innerText = data.temperature + '°C';
@@ -241,18 +235,17 @@
                 document.getElementById('rainfall').value = data.rainfall;
                 document.getElementById('wind_speed').value = data.wind_speed;
                 document.getElementById('weather_condition').value = data.weather_condition;
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error(e); alert("Connection Error"); }
             btn.innerHTML = '<i class="fas fa-search"></i>';
         }
 
+        // --- 2. Run Main Analysis ---
         async function runAnalysis() {
-            // 1. Check if weather is loaded
             if(document.getElementById('temperature').value === "") {
                 alert("Please enter a city and click Search to get weather data first!");
                 return;
             }
 
-            // 2. Prepare Data
             const baseData = {
                 crop_type: document.getElementById('crop_type').value,
                 soil_type: document.getElementById('soil_type').value,
@@ -265,52 +258,56 @@
                 weather_condition: document.getElementById('weather_condition').value
             };
 
-            // 3. Get Main Prediction
-            const res = await fetch('/predict', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(baseData)
-            });
-            const result = await res.json();
+            try {
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(baseData)
+                });
+                const result = await res.json();
 
-            // 4. Update Result Card & Visualization
-            const card = document.getElementById('resultCard');
-            card.style.display = 'block';
+                // Show Results
+                const card = document.getElementById('resultCard');
+                card.style.display = 'block';
 
-            const icon = document.getElementById('statusIcon');
-            const text = document.getElementById('statusText');
+                const icon = document.getElementById('statusIcon');
+                const text = document.getElementById('statusText');
 
-            if (result.needs_water) {
-                icon.innerHTML = '<i class="fas fa-tint text-primary fa-beat"></i>';
-                text.innerText = "Irrigate Now";
-                text.className = "fw-bold mt-2 text-primary";
-            } else {
-                icon.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
-                text.innerText = "No Action";
-                text.className = "fw-bold mt-2 text-success";
-            }
+                if (result.needs_water) {
+                    icon.innerHTML = '<i class="fas fa-tint text-primary fa-beat"></i>';
+                    text.innerText = "Irrigate Now";
+                    text.className = "fw-bold mt-2 text-primary";
+                } else {
+                    icon.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+                    text.innerText = "No Action";
+                    text.className = "fw-bold mt-2 text-success";
+                }
 
-            document.getElementById('resAmount').innerText = result.water_amount;
-            document.getElementById('resAdvice').innerText = result.advice;
-            document.getElementById('cropFactText').innerText = result.crop_fact;
+                document.getElementById('resAmount').innerText = result.water_amount;
+                document.getElementById('resAdvice').innerText = result.advice;
+                document.getElementById('cropFactText').innerText = result.crop_fact;
 
-            // Update Bars and Labels
-            document.getElementById('barTemp').style.width = result.impacts.temp + "%";
-            document.getElementById('lblTemp').innerText = result.impacts.temp + "%";
+                // Update Bars
+                document.getElementById('barTemp').style.width = result.impacts.temp + "%";
+                document.getElementById('lblTemp').innerText = result.impacts.temp + "%";
 
-            document.getElementById('barMoist').style.width = result.impacts.moisture + "%";
-            document.getElementById('lblMoist').innerText = result.impacts.moisture + "%";
+                document.getElementById('barMoist').style.width = result.impacts.moisture + "%";
+                document.getElementById('lblMoist').innerText = result.impacts.moisture + "%";
 
-            document.getElementById('barRain').style.width = result.impacts.rain + "%";
-            document.getElementById('lblRain').innerText = result.impacts.rain + "%";
+                document.getElementById('barRain').style.width = result.impacts.rain + "%";
+                document.getElementById('lblRain').innerText = result.impacts.rain + "%";
 
-            // 5. Get Forecast (After main result)
-            fetchForecast(baseData);
+                // Call Forecast
+                fetchForecast(baseData);
+            } catch(e) { console.error("Analysis failed", e); }
         }
 
+        // --- 3. Fetch Forecast & Build Table (FIXED) ---
         async function fetchForecast(baseData) {
             const city = document.getElementById('cityInput').value;
-
+            // IMPORTANT: Get crop name here for the button
+            const currentCrop = document.getElementById('crop_type').value; 
+            
             const res = await fetch('/predict_forecast', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -324,11 +321,32 @@
             tbody.innerHTML = '';
 
             forecasts.forEach(day => {
+                // Badge Logic
+                let decisionBadge = day.needs_water 
+                    ? '<span class="badge bg-danger">Water</span>' 
+                    : '<span class="badge bg-success">Wait</span>';
+
+                // Button Logic: Create 'Schedule' button ONLY if water is needed
+                let actionBtn = "";
+                if (day.needs_water) {
+                    actionBtn = `
+                        <button class="btn btn-sm btn-outline-primary mt-1" 
+                            style="font-size: 0.8em;"
+                            onclick="addToPlanner(this, '${day.date}', '${currentCrop}', ${day.amount})">
+                            <i class="fas fa-plus"></i> Schedule
+                        </button>
+                    `;
+                }
+                
                 const row = `<tr>
                     <td><strong>${day.day}</strong> <br><small class="text-muted">${day.date}</small></td>
                     <td><i class="fas fa-cloud"></i> ${day.condition}</td>
                     <td>${day.temp}°C</td>
                     <td>${day.needs_water ? '<span class="badge bg-danger">Water</span>' : '<span class="badge bg-success">Wait</span>'}</td>
+                    <td>
+                        ${decisionBadge}<br>
+                        ${actionBtn}
+                    </td>
                     <td class="fw-bold">${day.amount}</td>
                 </tr>`;
                 tbody.innerHTML += row;
@@ -337,9 +355,53 @@
             // Show Forecast Panel
             document.getElementById('forecastPanel').classList.remove('d-none');
         }
+
+        // --- 4. Add to Planner Function (FIXED) ---
+        function addToPlanner(btnElement, dateStr, cropName, amount) {
+            // 1. Immediate Feedback: Show loading spinner on the button
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            btnElement.disabled = true; // Prevent double clicks
+
+            fetch('/scheduler/add_task', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: dateStr,
+                    time: "06:00", 
+                    crop: cropName,
+                    amount: amount
+                })
+            })
+            .then(res => res.json())
+            .then(response => {
+                // 2. Handle Success or Duplicate
+                if(response.status === 'success' || response.status === 'duplicate') {
+                    // Change Button to Green Tick
+                    btnElement.classList.remove('btn-outline-primary');
+                    btnElement.classList.add('btn-success');
+                    btnElement.innerHTML = '<i class="fas fa-check"></i> Scheduled';
+                    
+                    // Optional: Alert the user if there was a specific warning
+                    if(response.warning) alert(response.warning);
+                    if(response.status === 'duplicate') alert("Note: This task was already in your planner.");
+                } else {
+                    // If there was an error, revert button
+                    alert(response.message || "Error adding task");
+                    btnElement.innerHTML = originalContent;
+                    btnElement.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error connecting to server.");
+                // Revert button on crash
+                btnElement.innerHTML = originalContent;
+                btnElement.disabled = false;
+            });
+        }
     </script>
 
-    <!-- ================ TRANSLATION SCRIPT (AJAX to /translate_texts) ================ -->
     <script>
         (function() {
             const languageSelect = document.getElementById('languageSelect');
@@ -375,13 +437,9 @@
                     if (!el) continue;
                     // Keep innerHTML for button so icons stay if any
                     if (id === 'btn_analyze') {
-                        // try to keep icon and replace only text node after icon
-                        // If structure is simple, replace innerText; otherwise fallback
                         try {
-                            // If button contains icon, preserve icon HTML
                             const icon = el.querySelector('i');
                             if (icon) {
-                                // Set button innerHTML = icon.outerHTML + ' ' + translated text
                                 el.innerHTML = icon.outerHTML + ' ' + obj[id];
                             } else {
                                 el.innerText = obj[id];
@@ -423,13 +481,11 @@
             window.addEventListener('DOMContentLoaded', function() {
                 const saved = localStorage.getItem('ui_lang') || 'en';
                 languageSelect.value = saved;
-                // Delay a tick to ensure DOM elements present
                 setTimeout(() => translateTo(saved), 200);
             });
         })();
     </script>
 
-<!-- START: AgriAssist Chatbot (bottom-left bubble) -->
 <style>
 #chat-bubble { position: fixed; bottom: 20px; left: 20px; z-index: 1050; }
 #chat-bubble button { width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,0,0.15); }
@@ -553,7 +609,5 @@
     });
 })();
 </script>
-<!-- END: AgriAssist Chatbot -->
-
 </body>
 </html>
