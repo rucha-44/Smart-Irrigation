@@ -77,6 +77,24 @@
         "date": "04 Dec",
         "time": "06:00",
         "amount": 3.4,
+        "status": "Completed",
+        "warning": null
+    },
+    {
+        "id": 1764933185412,
+        "crop": "Rice",
+        "date": "05 Dec",
+        "time": "06:00",
+        "amount": 1.9,
+        "status": "Scheduled",
+        "warning": null
+    },
+    {
+        "id": 1764933195922,
+        "crop": "Rice",
+        "date": "05 Dec",
+        "time": "06:00",
+        "amount": 1.8,
         "status": "Scheduled",
         "warning": null
     }

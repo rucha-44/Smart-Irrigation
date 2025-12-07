@@ -37,7 +37,7 @@ def add_task():
 
         # 1. DUPLICATE CHECK: Don't add if same crop on same day exists
         for t in tasks:
-            if t['date'] == data.get('date') and t['crop'] == data.get('crop'):
+            if ( t['date'] == data.get('date') and t['crop'] == data.get('crop') and str(t['amount']) == str(data.get('amount'))):
                 print("Duplicate found! Stopping save.") # Optional: For debugging
                 
                 # CRITICAL: This return statement STOPS the function here.

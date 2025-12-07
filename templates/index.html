@@ -105,10 +105,14 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label id="label_moist" class="fw-bold">Current Soil Moisture (0-100)</label>
-                                            <input type="number" class="form-control border-primary" id="soil_moisture" value="45">
-                                        </div>
+                                       <div class="col-md-6">
+    <label id="label_moist" class="fw-bold">Soil Condition</label>
+    <select class="form-select border-primary" id="soil_condition">
+        <option value="Dry">Dry (Dusty/Cracked)</option>
+        <option value="Moist">Moist (Cool/Dark)</option>
+        <option value="Wet">Wet (Muddy/Saturated)</option>
+    </select>
+</div>
                                     </div>
                                     
                                     <input type="hidden" id="temperature">
@@ -133,13 +137,13 @@
                             <div class="card-body">
                                 <table class="table table-hover align-middle">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Forecast</th>
-                                            <th>Temp</th>
-                                            <th>Decision</th>
-                                            <th>Water Qty <small class="text-muted">(L/m²)</small></th>
-                                        </tr>
+                                     <thead class="table-light">
+    <tr>
+        <th>Date</th>
+        <th>Forecast</th>
+        <th>Temp</th>
+        <th>Decision</th> <th>Water Qty <small class="text-muted">(L/m²)</small></th> </tr>
+</thead>
                                     </thead>
                                     <tbody id="forecastTableBody"></tbody>
                                 </table>
@@ -249,8 +253,9 @@
             const baseData = {
                 crop_type: document.getElementById('crop_type').value,
                 soil_type: document.getElementById('soil_type').value,
+                soil_condition: document.getElementById('soil_condition').value,
                 region: document.getElementById('region').value,
-                soil_moisture: document.getElementById('soil_moisture').value,
+              
                 temperature: document.getElementById('temperature').value,
                 humidity: document.getElementById('humidity').value,
                 rainfall: document.getElementById('rainfall').value,
@@ -266,6 +271,11 @@
                 });
                 const result = await res.json();
 
+                if(result.error) {
+                   alert("Error: " + result.error);
+                   return;
+               }
+               
                 // Show Results
                 const card = document.getElementById('resultCard');
                 card.style.display = 'block';
@@ -303,59 +313,65 @@
         }
 
         // --- 3. Fetch Forecast & Build Table (FIXED) ---
-        async function fetchForecast(baseData) {
+       async function fetchForecast(baseData) {
             const city = document.getElementById('cityInput').value;
-            // IMPORTANT: Get crop name here for the button
             const currentCrop = document.getElementById('crop_type').value; 
             
-            const res = await fetch('/predict_forecast', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({city: city, base_inputs: baseData})
-            });
-            const forecasts = await res.json();
+            try {
+                const res = await fetch('/predict_forecast', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({city: city, base_inputs: baseData})
+                });
+                const forecasts = await res.json();
 
-            if(forecasts.error) return;
+                if(forecasts.error) return;
 
-            const tbody = document.getElementById('forecastTableBody');
-            tbody.innerHTML = '';
+                const tbody = document.getElementById('forecastTableBody');
+                tbody.innerHTML = '';
 
-            forecasts.forEach(day => {
-                // Badge Logic
-                let decisionBadge = day.needs_water 
-                    ? '<span class="badge bg-danger">Water</span>' 
-                    : '<span class="badge bg-success">Wait</span>';
+                forecasts.forEach(day => {
+                    // 1. Define Badge
+                    let decisionBadge = day.needs_water 
+                        ? '<span class="badge bg-danger">Water</span>' 
+                        : '<span class="badge bg-success">Wait</span>';
 
-                // Button Logic: Create 'Schedule' button ONLY if water is needed
-                let actionBtn = "";
-                if (day.needs_water) {
-                    actionBtn = `
-                        <button class="btn btn-sm btn-outline-primary mt-1" 
-                            style="font-size: 0.8em;"
-                            onclick="addToPlanner(this, '${day.date}', '${currentCrop}', ${day.amount})">
-                            <i class="fas fa-plus"></i> Schedule
-                        </button>
-                    `;
-                }
-                
-                const row = `<tr>
-                    <td><strong>${day.day}</strong> <br><small class="text-muted">${day.date}</small></td>
-                    <td><i class="fas fa-cloud"></i> ${day.condition}</td>
-                    <td>${day.temp}°C</td>
-                    <td>${day.needs_water ? '<span class="badge bg-danger">Water</span>' : '<span class="badge bg-success">Wait</span>'}</td>
-                    <td>
-                        ${decisionBadge}<br>
-                        ${actionBtn}
-                    </td>
-                    <td class="fw-bold">${day.amount}</td>
-                </tr>`;
-                tbody.innerHTML += row;
-            });
+                    // 2. Define Button (Only if water needed)
+                    let actionBtn = "";
+                    if (day.needs_water) {
+                        actionBtn = `
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-primary" 
+                                    style="font-size: 0.75em; padding: 2px 8px;"
+                                    onclick="addToPlanner(this, '${day.date}', '${currentCrop}', ${day.amount})">
+                                    <i class="fas fa-plus"></i> Schedule
+                                </button>
+                            </div>
+                        `;
+                    }
 
-            // Show Forecast Panel
-            document.getElementById('forecastPanel').classList.remove('d-none');
+                    // 3. Build Row (5 Columns)
+                    const row = `<tr>
+                        <td><strong>${day.day}</strong> <br><small class="text-muted">${day.date}</small></td>
+                        
+                        <td><i class="fas fa-cloud"></i> ${day.condition}</td>
+                        
+                        <td>${day.temp}°C</td>
+                        
+                        <td class="align-middle">
+                            ${decisionBadge}
+                            ${actionBtn}
+                        </td>
+                        
+                        <td class="fw-bold align-middle">${day.amount}</td>
+                    </tr>`;
+                    
+                    tbody.innerHTML += row;
+                });
+
+                document.getElementById('forecastPanel').classList.remove('d-none');
+            } catch(e) { console.error("Forecast failed", e); }
         }
-
         // --- 4. Add to Planner Function (FIXED) ---
         function addToPlanner(btnElement, dateStr, cropName, amount) {
             // 1. Immediate Feedback: Show loading spinner on the button

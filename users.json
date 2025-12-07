@@ -63,5 +63,14 @@
             "Wheat",
             "Rice"
         ]
+    },
+    {
+        "email": "swapnilaryan11@gmail.com",
+        "username": "",
+        "password": "scrypt:32768:8:1$p6iptHm23H6iFyWb$18e16f6b836cc51f0c9d6e7501e84906508d1f07f167f250caa7158c561bb993248c78cb135e7cde14aa60975866ce14e6ed94c834a0a7e10b89a8ed94d0313d",
+        "land_area": "6",
+        "crops": [
+            "sugercane"
+        ]
     }
 ]
