@@ -11,7 +11,7 @@ from services.weather_service import WeatherService
 from translator import tr
 from groq import Groq
 from flask_cors import CORS
-from scheduler_controller import scheduler_bp
+from scheduler_controller import scheduler_bp, get_user_tasks
 from geopy.geocoders import Nominatim
 
 # Initialize Geocoder (Add this after creating your 'app' variable)
@@ -219,6 +219,17 @@ def get_prediction(input_dict):
 # -------------------------------------------
 # ROUTES
 # -------------------------------------------
+
+@app.route("/planner")
+def planner():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    
+    # Fetch tasks for the logged-in user
+    tasks = get_user_tasks(session["user"])
+    
+    return render_template("scheduler.html", tasks=tasks)
+
 
 @app.route("/")
 def home():
