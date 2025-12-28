@@ -13,21 +13,8 @@
         .impact-bar { height: 10px; border-radius: 5px; }
         .crop-fact-card { border-left: 5px solid #2ecc71; background-color: #f0fff4; }
         .unit-badge { font-size: 0.6em; vertical-align: super; opacity: 0.7; }
-
-        /* small styling for language card to match sidebar */
-        .lang-card {
-            background: rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 12px;
-        }
-
-        /* make sure any hidden google widgets won't affect layout (not used here but safe) */
-        .goog-te-banner-frame.skiptranslate,
-        .goog-te-gadget-icon,
-        .goog-te-menu-frame,
-        .goog-te-balloon-frame {
-            display: none !important;
-        }
+        .lang-card { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; }
+        .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon, .goog-te-menu-frame, .goog-te-balloon-frame { display: none !important; }
         body { top: 0 !important; }
     </style>
 </head>
@@ -44,7 +31,6 @@
                        <i class="fas fa-calendar-check me-2"></i> Weekly Planner
                     </a>
                 </div>
-                
 
                 <div class="weather-card mt-4 p-3 rounded">
                     <h5 id="live_weather"><i class="fas fa-cloud-sun"></i> Live Weather</h5>
@@ -84,35 +70,48 @@
                                         <div class="col-md-6">
                                             <label id="label_crop" class="fw-bold">Crop Selection</label>
                                             <select class="form-select" id="crop_type">
+                                                <option value="" selected disabled>-- Select a Crop --</option>
                                                 {% for opt in options['CROP_TYPE'] %}
                                                 <option value="{{opt}}">{{opt}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
+                                        
                                         <div class="col-md-6">
                                             <label id="label_soil" class="fw-bold">Soil Type</label>
                                             <select class="form-select" id="soil_type">
+                                                <option value="" selected disabled>-- Select Soil Type --</option>
                                                 {% for opt in options['SOIL_TYPE'] %}
                                                 <option value="{{opt}}">{{opt}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
+                                        
                                         <div class="col-md-6">
                                             <label id="label_region" class="fw-bold">Region</label>
                                             <select class="form-select" id="region">
+                                                <option value="" selected disabled>-- Select Region --</option>
                                                 {% for opt in options['REGION'] %}
                                                 <option value="{{opt}}">{{opt}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
-                                       <div class="col-md-6">
-    <label id="label_moist" class="fw-bold">Soil Condition</label>
-    <select class="form-select border-primary" id="soil_condition">
-        <option value="Dry">Dry (Dusty/Cracked)</option>
-        <option value="Moist">Moist (Cool/Dark)</option>
-        <option value="Wet">Wet (Muddy/Saturated)</option>
-    </select>
-</div>
+                                        
+                                        <div class="col-md-6">
+                                            <label id="label_moist" class="fw-bold">Soil Condition</label>
+                                            <select class="form-select border-primary" id="soil_condition">
+                                                <option value="" selected disabled>-- Select Condition --</option>
+                                                <option value="Dry">Dry (Dusty/Cracked)</option>
+                                                <option value="Moist">Moist (Cool/Dark)</option>
+                                                <option value="Wet">Wet (Muddy/Saturated)</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="fw-bold">Crop Age (Days)</label>
+                                            <input type="number" class="form-control border-primary" id="crop_age" placeholder="Select crop first" disabled required>
+                                            <small class="text-muted d-block mt-1" id="age_help">Select a crop to see growth cycle</small>
+                                        </div>
                                     </div>
                                     
                                     <input type="hidden" id="temperature">
@@ -137,13 +136,13 @@
                             <div class="card-body">
                                 <table class="table table-hover align-middle">
                                     <thead class="table-light">
-                                     <thead class="table-light">
-    <tr>
-        <th>Date</th>
-        <th>Forecast</th>
-        <th>Temp</th>
-        <th>Decision</th> <th>Water Qty <small class="text-muted">(L/m²)</small></th> </tr>
-</thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Forecast</th>
+                                            <th>Temp</th>
+                                            <th>Decision</th>
+                                            <th>Water Qty <small class="text-muted">(L/m²)</small></th>
+                                        </tr>
                                     </thead>
                                     <tbody id="forecastTableBody"></tbody>
                                 </table>
@@ -157,7 +156,6 @@
                                 <div class="text-center mb-4">
                                     <div id="statusIcon" style="font-size: 4rem;"></div>
                                     <h3 id="statusText" class="fw-bold mt-2"></h3>
-                                    
                                     <h4 class="text-primary mt-2">
                                         <i class="fas fa-fill-drip"></i> 
                                         <span id="resAmount" class="display-6 fw-bold"></span> 
@@ -165,16 +163,13 @@
                                     </h4>
                                     <small class="text-muted">(Equivalent to mm of rain)</small>
                                 </div>
-                                
                                 <div class="card crop-fact-card mb-3">
                                     <div class="card-body p-2">
                                         <small class="text-success fw-bold">CROP INSIGHT:</small><br>
                                         <small id="cropFactText" class="text-muted"></small>
                                     </div>
                                 </div>
-
                                 <h6 id="decision_factors" class="fw-bold mt-4">Decision Factors:</h6>
-                                
                                 <div class="d-flex justify-content-between small">
                                     <span class="text-muted">Heat Stress</span>
                                     <span class="text-danger fw-bold" id="lblTemp"></span>
@@ -182,7 +177,6 @@
                                 <div class="progress mb-2" style="height: 6px;">
                                     <div id="barTemp" class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
                                 </div>
-
                                 <div class="d-flex justify-content-between small">
                                     <span class="text-muted">Soil Dryness</span>
                                     <span class="text-warning fw-bold" id="lblMoist"></span>
@@ -190,7 +184,6 @@
                                 <div class="progress mb-2" style="height: 6px;">
                                     <div id="barMoist" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
                                 </div>
-
                                 <div class="d-flex justify-content-between small">
                                     <span class="text-muted">Rainfall Offset</span>
                                     <span class="text-info fw-bold" id="lblRain"></span>
@@ -198,7 +191,6 @@
                                 <div class="progress mb-2" style="height: 6px;">
                                     <div id="barRain" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
                                 </div>
-                                
                                 <div class="alert alert-light border mt-3 small" id="resAdvice"></div>
                             </div>
                         </div>
@@ -208,13 +200,24 @@
         </div>
     </div>
 
+    <script id="crop-data-source" type="application/json">
+        {{ crop_data | tojson | safe }}
+    </script>
+
     <script>
-        // --- 1. Fetch Weather ---
+        // --- 0. GLOBAL CROP DATA ---
+        let CROP_DATA = {};
+        try {
+            CROP_DATA = JSON.parse(document.getElementById('crop-data-source').textContent);
+        } catch (e) { console.error("Failed to parse crop data", e); }
+
+        // --- 1. Fetch Weather (Auto-Select Region) ---
         async function fetchWeather() {
             const city = document.getElementById('cityInput').value;
             if(!city) return;
 
             const btn = document.querySelector('.weather-card button');
+            const originalBtn = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             try {
@@ -225,8 +228,9 @@
                 });
                 const data = await res.json();
 
-                if(data.error) { alert(data.error); btn.innerHTML = '<i class="fas fa-search"></i>'; return; }
+                if(data.error) { alert(data.error); btn.innerHTML = originalBtn; return; }
 
+                // Update UI
                 document.getElementById('weatherDisplay').classList.remove('d-none');
                 document.getElementById('wTemp').innerText = data.temperature + '°C';
                 document.getElementById('wCond').innerText = data.condition_desc || data.weather_condition;
@@ -239,23 +243,84 @@
                 document.getElementById('rainfall').value = data.rainfall;
                 document.getElementById('wind_speed').value = data.wind_speed;
                 document.getElementById('weather_condition').value = data.weather_condition;
-            } catch(e) { console.error(e); alert("Connection Error"); }
-            btn.innerHTML = '<i class="fas fa-search"></i>';
+
+                // --- SMART REGION CHECK ---
+                if (data.detected_region) {
+                    const regionSelect = document.getElementById('region');
+                    const selectedCrop = document.getElementById('crop_type').value;
+                    
+                    // A. Update Region
+                    regionSelect.value = data.detected_region;
+                    
+                    // B. Validate Against Crop
+                    if (selectedCrop && CROP_DATA[selectedCrop]) {
+                        const cropInfo = CROP_DATA[selectedCrop];
+                        
+                        // Logic: ideal regions check
+                        if (cropInfo.ideal_regions && cropInfo.ideal_regions[0] !== 'All') {
+                            const isIdeal = cropInfo.ideal_regions.includes(data.detected_region);
+                            
+                            if (!isIdeal) {
+                                regionSelect.style.border = "2px solid #dc3545"; // Red
+                                setTimeout(() => {
+                                    alert(`⚠️ REGION MISMATCH WARNING ⚠️\n\n` +
+                                          `• You selected: ${selectedCrop}\n` + 
+                                          `• City '${city}' is in: ${data.detected_region}\n\n` +
+                                          `Agronomy Note: ${selectedCrop} grows best in: ${cropInfo.ideal_regions.join(', ')}.\n\n` + 
+                                          `The system has set region to ${data.detected_region} to match the city.`);
+                                }, 100);
+                            } else {
+                                flashGreen(regionSelect);
+                            }
+                        } else {
+                            flashGreen(regionSelect);
+                        }
+                    } else {
+                        flashGreen(regionSelect);
+                    }
+                }
+
+            } catch(e) { console.error(e); alert("Connection Error: " + e.message); }
+            btn.innerHTML = originalBtn;
+        }
+
+        function flashGreen(element) {
+            const originalBorder = element.style.border;
+            element.style.border = "2px solid #2ecc71"; 
+            element.style.transition = "border 0.3s";
+            setTimeout(() => { element.style.border = "1px solid #ced4da"; }, 1500);
         }
 
         // --- 2. Run Main Analysis ---
         async function runAnalysis() {
+            // Validate ALL inputs are present
             if(document.getElementById('temperature').value === "") {
                 alert("Please enter a city and click Search to get weather data first!");
+                return;
+            }
+            if(document.getElementById('crop_type').value === "") {
+                alert("Please select a Crop.");
+                return;
+            }
+            if(document.getElementById('soil_type').value === "") {
+                alert("Please select a Soil Type.");
+                return;
+            }
+            if(document.getElementById('region').value === "") {
+                alert("Please select a Region (or search a city).");
+                return;
+            }
+            if(document.getElementById('soil_condition').value === "") {
+                alert("Please select Soil Condition.");
                 return;
             }
 
             const baseData = {
                 crop_type: document.getElementById('crop_type').value,
                 soil_type: document.getElementById('soil_type').value,
-                soil_condition: document.getElementById('soil_condition').value,
                 region: document.getElementById('region').value,
-              
+                soil_condition: document.getElementById('soil_condition').value,
+                crop_age: document.getElementById('crop_age').value,
                 temperature: document.getElementById('temperature').value,
                 humidity: document.getElementById('humidity').value,
                 rainfall: document.getElementById('rainfall').value,
@@ -271,15 +336,11 @@
                 });
                 const result = await res.json();
 
-                if(result.error) {
-                   alert("Error: " + result.error);
-                   return;
-               }
-               
-                // Show Results
+                if(result.error) { alert(result.error); return; }
+
+                // Update UI
                 const card = document.getElementById('resultCard');
                 card.style.display = 'block';
-
                 const icon = document.getElementById('statusIcon');
                 const text = document.getElementById('statusText');
 
@@ -296,88 +357,70 @@
                 document.getElementById('resAmount').innerText = result.water_amount;
                 document.getElementById('resAdvice').innerText = result.advice;
                 document.getElementById('cropFactText').innerText = result.crop_fact;
-
-                // Update Bars
+                
+                // Bars
                 document.getElementById('barTemp').style.width = result.impacts.temp + "%";
                 document.getElementById('lblTemp').innerText = result.impacts.temp + "%";
-
                 document.getElementById('barMoist').style.width = result.impacts.moisture + "%";
                 document.getElementById('lblMoist').innerText = result.impacts.moisture + "%";
-
                 document.getElementById('barRain').style.width = result.impacts.rain + "%";
                 document.getElementById('lblRain').innerText = result.impacts.rain + "%";
 
-                // Call Forecast
                 fetchForecast(baseData);
             } catch(e) { console.error("Analysis failed", e); }
         }
 
-        // --- 3. Fetch Forecast & Build Table (FIXED) ---
-       async function fetchForecast(baseData) {
+        // --- 3. Fetch Forecast ---
+        async function fetchForecast(baseData) {
             const city = document.getElementById('cityInput').value;
             const currentCrop = document.getElementById('crop_type').value; 
             
-            try {
-                const res = await fetch('/predict_forecast', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({city: city, base_inputs: baseData})
-                });
-                const forecasts = await res.json();
+            const res = await fetch('/predict_forecast', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({city: city, base_inputs: baseData})
+            });
+            const forecasts = await res.json();
+            if(forecasts.error) return;
 
-                if(forecasts.error) return;
+            const tbody = document.getElementById('forecastTableBody');
+            tbody.innerHTML = '';
 
-                const tbody = document.getElementById('forecastTableBody');
-                tbody.innerHTML = '';
+            forecasts.forEach(day => {
+                let decisionBadge = day.needs_water 
+                    ? '<span class="badge bg-danger">Water</span>' 
+                    : '<span class="badge bg-success">Wait</span>';
 
-                forecasts.forEach(day => {
-                    // 1. Define Badge
-                    let decisionBadge = day.needs_water 
-                        ? '<span class="badge bg-danger">Water</span>' 
-                        : '<span class="badge bg-success">Wait</span>';
-
-                    // 2. Define Button (Only if water needed)
-                    let actionBtn = "";
-                    if (day.needs_water) {
-                        actionBtn = `
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-primary" 
-                                    style="font-size: 0.75em; padding: 2px 8px;"
-                                    onclick="addToPlanner(this, '${day.date}', '${currentCrop}', ${day.amount})">
-                                    <i class="fas fa-plus"></i> Schedule
-                                </button>
-                            </div>
-                        `;
-                    }
-
-                    // 3. Build Row (5 Columns)
-                    const row = `<tr>
-                        <td><strong>${day.day}</strong> <br><small class="text-muted">${day.date}</small></td>
-                        
-                        <td><i class="fas fa-cloud"></i> ${day.condition}</td>
-                        
-                        <td>${day.temp}°C</td>
-                        
-                        <td class="align-middle">
-                            ${decisionBadge}
-                            ${actionBtn}
-                        </td>
-                        
-                        <td class="fw-bold align-middle">${day.amount}</td>
-                    </tr>`;
-                    
-                    tbody.innerHTML += row;
-                });
-
-                document.getElementById('forecastPanel').classList.remove('d-none');
-            } catch(e) { console.error("Forecast failed", e); }
+                let actionBtn = "";
+                if (day.needs_water) {
+                    actionBtn = `
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary" 
+                                style="font-size: 0.75em; padding: 2px 8px;"
+                                onclick="addToPlanner(this, '${day.date}', '${currentCrop}', ${day.amount})">
+                                <i class="fas fa-plus"></i> Schedule
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                const row = `<tr>
+                    <td><strong>${day.day}</strong> <br><small class="text-muted">${day.date}</small></td>
+                    <td><i class="fas fa-cloud"></i> ${day.condition}</td>
+                    <td>${day.temp}°C</td>
+                    <td class="align-middle">${decisionBadge} ${actionBtn}</td>
+                    <td class="fw-bold align-middle">${day.amount}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+            document.getElementById('forecastPanel').classList.remove('d-none');
         }
-        // --- 4. Add to Planner Function (FIXED) ---
+
+        // --- 4. Add to Planner ---
         function addToPlanner(btnElement, dateStr, cropName, amount) {
-            // 1. Immediate Feedback: Show loading spinner on the button
             const originalContent = btnElement.innerHTML;
-            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            btnElement.disabled = true; // Prevent double clicks
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btnElement.disabled = true;
 
             fetch('/scheduler/add_task', {
                 method: 'POST',
@@ -391,18 +434,13 @@
             })
             .then(res => res.json())
             .then(response => {
-                // 2. Handle Success or Duplicate
                 if(response.status === 'success' || response.status === 'duplicate') {
-                    // Change Button to Green Tick
                     btnElement.classList.remove('btn-outline-primary');
                     btnElement.classList.add('btn-success');
                     btnElement.innerHTML = '<i class="fas fa-check"></i> Scheduled';
-                    
-                    // Optional: Alert the user if there was a specific warning
                     if(response.warning) alert(response.warning);
                     if(response.status === 'duplicate') alert("Note: This task was already in your planner.");
                 } else {
-                    // If there was an error, revert button
                     alert(response.message || "Error adding task");
                     btnElement.innerHTML = originalContent;
                     btnElement.disabled = false;
@@ -411,7 +449,6 @@
             .catch(err => {
                 console.error(err);
                 alert("Error connecting to server.");
-                // Revert button on crash
                 btnElement.innerHTML = originalContent;
                 btnElement.disabled = false;
             });
@@ -419,211 +456,180 @@
     </script>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cropSelect = document.getElementById('crop_type');
+            const regionSelect = document.getElementById('region');
+            const soilSelect = document.getElementById('soil_type');
+            const conditionSelect = document.getElementById('soil_condition');
+            const ageInput = document.getElementById('crop_age');
+            const helpText = document.getElementById('age_help');
+
+            // Create Phase Badge
+            let phaseBadge = document.getElementById('phase-badge');
+            if (!phaseBadge) {
+                phaseBadge = document.createElement('div');
+                phaseBadge.id = 'phase-badge';
+                phaseBadge.className = 'mt-2 alert alert-info py-1 px-2 d-none'; 
+                phaseBadge.style.fontSize = '0.9em';
+                ageInput.parentNode.appendChild(phaseBadge);
+            }
+
+            function updateCropSettings() {
+                const crop = cropSelect.value;
+                if (!crop) {
+                    ageInput.disabled = true;
+                    ageInput.value = '';
+                    ageInput.placeholder = "Select crop first";
+                    helpText.innerText = "Select a crop to see growth cycle";
+                    phaseBadge.classList.add('d-none');
+                    return; 
+                }
+                
+                ageInput.disabled = false;
+                const data = CROP_DATA[crop]; 
+                const maxDays = data ? data.max_days : 365;
+
+                // A. Set Max Age
+                ageInput.max = maxDays;
+                ageInput.placeholder = `Max ${maxDays}`;
+                helpText.innerText = `Growth Cycle: 1 - ${maxDays} days for ${crop}`;
+                helpText.style.color = "#6c757d";
+
+                // B. Auto-Select Ideal Region (Only if user hasn't typed a city yet)
+                const cityInput = document.getElementById('cityInput');
+                if (cityInput.value === "" && data && data.ideal_regions && data.ideal_regions[0] !== 'All') {
+                    if (!data.ideal_regions.includes(regionSelect.value)) {
+                        regionSelect.value = data.ideal_regions[0];
+                        // Green Flash
+                        flashElement(regionSelect, "#f1c40f");
+                    }
+                }
+                
+                // C. Check Soil & Condition
+                checkSoilMismatch();
+                checkConditionMismatch();
+                
+                validateAge();
+            }
+
+            function checkSoilMismatch() {
+                const crop = cropSelect.value;
+                const soil = soilSelect.value;
+                if (!crop || !soil || !CROP_DATA[crop]) return;
+                const idealSoils = CROP_DATA[crop].ideal_soil;
+                if (idealSoils && !idealSoils.includes(soil)) {
+                    soilSelect.style.border = "2px solid #dc3545"; // Red
+                } else {
+                    soilSelect.style.border = "1px solid #ced4da"; 
+                }
+            }
+
+            function checkConditionMismatch() {
+                const crop = cropSelect.value;
+                const cond = conditionSelect.value;
+                if (!crop || !cond || !CROP_DATA[crop]) return;
+                const idealConds = CROP_DATA[crop].ideal_condition;
+                if (idealConds && !idealConds.includes(cond)) {
+                    conditionSelect.style.border = "2px solid #dc3545"; // Red
+                } else {
+                    conditionSelect.style.border = "1px solid #ced4da"; 
+                }
+            }
+
+            function validateAge() {
+                const crop = cropSelect.value;
+                if (!crop) return;
+                
+                const data = CROP_DATA[crop];
+                let age = parseInt(ageInput.value);
+                const max = parseInt(ageInput.max);
+
+                if (age > max) {
+                    ageInput.value = max;
+                    age = max;
+                    helpText.style.color = "#dc3545"; 
+                    helpText.innerText = `⚠️ Limit Reached! Harvest for ${crop} is ${max} days.`;
+                } else {
+                    helpText.style.color = "#6c757d"; 
+                    helpText.innerText = `Growth Cycle: 1 - ${max} days for ${crop}`;
+                }
+
+                if (!age || !data || !data.stages) {
+                    phaseBadge.classList.add('d-none');
+                    return;
+                }
+
+                let currentStage = data.stages.find(stage => age >= stage.range[0] && age <= stage.range[1]);
+
+                if (currentStage) {
+                    phaseBadge.classList.remove('d-none');
+                    if (currentStage.water_msg.includes("STOP")) {
+                        phaseBadge.className = 'mt-2 alert alert-danger py-1 px-2'; 
+                        phaseBadge.innerHTML = `<i class="fas fa-ban"></i> <strong>${currentStage.name}</strong><br>${currentStage.water_msg}`;
+                    } else if (currentStage.water_msg.includes("PEAK") || currentStage.water_msg.includes("HEAVY")) {
+                        phaseBadge.className = 'mt-2 alert alert-primary py-1 px-2'; 
+                        phaseBadge.innerHTML = `<i class="fas fa-water"></i> <strong>${currentStage.name}</strong><br>${currentStage.water_msg}`;
+                    } else {
+                        phaseBadge.className = 'mt-2 alert alert-success py-1 px-2'; 
+                        phaseBadge.innerHTML = `<i class="fas fa-leaf"></i> <strong>${currentStage.name}</strong><br>${currentStage.water_msg}`;
+                    }
+                } else {
+                    phaseBadge.classList.add('d-none');
+                }
+            }
+
+            function flashElement(el, color) {
+                const original = el.style.border;
+                el.style.border = `2px solid ${color}`;
+                el.style.transition = "border 0.3s";
+                setTimeout(() => { el.style.border = "1px solid #ced4da"; }, 1500);
+            }
+
+            cropSelect.addEventListener('change', updateCropSettings);
+            soilSelect.addEventListener('change', checkSoilMismatch);
+            conditionSelect.addEventListener('change', checkConditionMismatch);
+            ageInput.addEventListener('input', validateAge);
+            
+            // Initialize
+            updateCropSettings();
+        });
+    </script>
+
+    <script>
         (function() {
             const languageSelect = document.getElementById('languageSelect');
-
-            // IDs and the element text to translate
-            const translatableIds = [
-                'title_smart',
-                'subtitle_ai',
-                'live_weather',
-                'label_crop',
-                'label_soil',
-                'label_region',
-                'label_moist',
-                'btn_analyze',
-                'forecast_title',
-                'decision_factors'
-            ];
-
-            // Helper: collect current text mapping
+            const translatableIds = ['title_smart','subtitle_ai','live_weather','label_crop','label_soil','label_region','label_moist','btn_analyze','forecast_title','decision_factors','crop_type','soil_type','region','soil_condition'];
             function collectTexts() {
                 const texts = {};
                 translatableIds.forEach(id => {
                     const el = document.getElementById(id);
-                    if (el) texts[id] = el.innerText.trim();
+                    if (!el) return;
+                    if (el.tagName === 'SELECT') { for (let i = 0; i < el.options.length; i++) { texts[`${id}_${i}`] = el.options[i].innerText.trim(); } } 
+                    else { texts[id] = el.innerText.trim(); }
                 });
                 return texts;
             }
-
-            // Helper: apply translated mapping to DOM
             function applyTranslations(obj) {
-                for (const id in obj) {
+                translatableIds.forEach(id => {
                     const el = document.getElementById(id);
-                    if (!el) continue;
-                    // Keep innerHTML for button so icons stay if any
-                    if (id === 'btn_analyze') {
-                        try {
-                            const icon = el.querySelector('i');
-                            if (icon) {
-                                el.innerHTML = icon.outerHTML + ' ' + obj[id];
-                            } else {
-                                el.innerText = obj[id];
-                            }
-                        } catch (e) {
-                            el.innerText = obj[id];
-                        }
-                    } else {
-                        el.innerText = obj[id];
-                    }
-                }
+                    if (!el) return;
+                    if (el.tagName === 'SELECT') { for (let i = 0; i < el.options.length; i++) { const key = `${id}_${i}`; if (obj[key]) el.options[i].innerText = obj[key]; } } 
+                    else { if (obj[id]) { if (id === 'btn_analyze') { try { const icon = el.querySelector('i'); if (icon) el.innerHTML = icon.outerHTML + ' ' + obj[id]; else el.innerText = obj[id]; } catch (e) { el.innerText = obj[id]; } } else { el.innerText = obj[id]; } } }
+                });
             }
-
-            // Translate via backend
             async function translateTo(lang) {
+                if(lang === 'en') { location.reload(); return; }
                 const texts = collectTexts();
-                try {
-                    const res = await fetch('/translate_texts', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ lang, texts })
-                    });
-                    if (!res.ok) throw new Error('Translate API returned ' + res.status);
-                    const translated = await res.json();
-                    applyTranslations(translated);
-                } catch (err) {
-                    console.error('Translation error:', err);
-                }
+                try { const res = await fetch('/translate_texts', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ lang, texts }) }); if (!res.ok) throw new Error('API Error'); const translated = await res.json(); applyTranslations(translated); } catch (err) { console.error(err); }
             }
-
-            // On change: call API and save pref
-            languageSelect.addEventListener('change', function() {
-                const lang = this.value;
-                localStorage.setItem('ui_lang', lang);
-                translateTo(lang);
-            });
-
-            // On load: apply saved pref (if present)
-            window.addEventListener('DOMContentLoaded', function() {
-                const saved = localStorage.getItem('ui_lang') || 'en';
-                languageSelect.value = saved;
-                setTimeout(() => translateTo(saved), 200);
-            });
+            languageSelect.addEventListener('change', function() { const lang = this.value; localStorage.setItem('ui_lang', lang); translateTo(lang); });
+            window.addEventListener('DOMContentLoaded', function() { const saved = localStorage.getItem('ui_lang') || 'en'; languageSelect.value = saved; if(saved !== 'en') setTimeout(() => translateTo(saved), 200); });
         })();
     </script>
 
-<style>
-#chat-bubble { position: fixed; bottom: 20px; left: 20px; z-index: 1050; }
-#chat-bubble button { width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,0,0.15); }
-#chat-window { position: fixed; bottom: 90px; left: 20px; width: 320px; max-height: 480px; z-index:1050; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.18); display:none; flex-direction:column; overflow:hidden; }
-#chat-window .cw-header { background: linear-gradient(90deg,#2ecc71,#27ae60); color:#fff; padding:12px; display:flex; align-items:center; gap:8px; }
-#chat-window .close-chat { margin-left:auto; background:transparent; border:none; color:white; }
-#chat-window .cw-body { padding:12px; overflow-y:auto; flex:1; background:#f8f9fa; }
-.chat-msg { margin-bottom:10px; display:flex; }
-.chat-msg.user { justify-content:flex-end; }
-.chat-msg .bubble { max-width:78%; padding:8px 10px; border-radius:10px; }
-.chat-msg.user .bubble { background:#dcf8c6; }
-.chat-msg.bot .bubble { background:white; border:1px solid #e6e6e6; }
-#chat-window .cw-input { padding:8px; border-top:1px solid #eee; display:flex; gap:8px; }
-#chat-window textarea { resize:none; border-radius:6px; border:1px solid #ddd; padding:8px; flex:1; height:44px; }
-#chat-window .send-btn { border:none; background:#27ae60; color:white; padding:8px 12px; border-radius:6px; }
-.small-hint { font-size:12px; color:#666; margin-top:6px; }
-</style>
-
-<div id="chat-bubble">
-    <button id="openChat" title="Ask AgriAssist"><i class="fas fa-comment-dots" style="font-size:18px"></i></button>
-</div>
-
-<div id="chat-window" aria-hidden="true" role="dialog" aria-label="Chat with AgriAssist">
-    <div class="cw-header">
-        <i class="fas fa-tractor"></i>
-        <div style="margin-left:6px;">
-            <div style="font-weight:600">AgriAssist</div>
-            <div style="font-size:12px;opacity:0.9">Ask about crops, irrigation, pests…</div>
-        </div>
-        <button class="close-chat" id="closeChat" title="Close"><i class="fas fa-times"></i></button>
-    </div>
-
-    <div class="cw-body" id="chatMessages">
-        <div class="small-hint">Tip: ask practical questions like "When should I water wheat?"</div>
-    </div>
-
-    <div class="cw-input">
-        <textarea id="chatInput" placeholder="Type your question..." maxlength="600"></textarea>
-        <button class="send-btn" id="sendChat">Send</button>
-    </div>
-</div>
-
-<script>
-(function(){
-    const openBtn = document.getElementById('openChat');
-    const closeBtn = document.getElementById('closeChat');
-    const chatWindow = document.getElementById('chat-window');
-    const sendBtn = document.getElementById('sendChat');
-    const chatInput = document.getElementById('chatInput');
-    const chatMessages = document.getElementById('chatMessages');
-
-    let convoHistory = []; // short client-side history
-
-    function openChat() { chatWindow.style.display = 'flex'; chatWindow.setAttribute('aria-hidden','false'); chatInput.focus(); }
-    function closeChat() { chatWindow.style.display = 'none'; chatWindow.setAttribute('aria-hidden','true'); }
-
-    function appendMessage(role, text) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'chat-msg ' + (role === 'user' ? 'user' : 'bot');
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        bubble.innerText = text;
-        wrapper.appendChild(bubble);
-        chatMessages.appendChild(wrapper);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function setLoadingState(isLoading) {
-        sendBtn.disabled = isLoading;
-        sendBtn.innerText = isLoading ? '...' : 'Send';
-    }
-
-    async function sendMessage() {
-        const text = chatInput.value.trim();
-        if (!text) return;
-        appendMessage('user', text);
-        convoHistory.push({role: 'user', content: text});
-        chatInput.value = '';
-        setLoadingState(true);
-
-        try {
-            const res = await fetch('/chatbot', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ message: text, history: convoHistory })
-            });
-            const data = await res.json();
-            if (res.ok && data.reply) {
-                appendMessage('assistant', data.reply);
-                convoHistory.push({role: 'assistant', content: data.reply});
-            } else {
-                appendMessage('assistant', 'Sorry, something went wrong: ' + (data.error || res.status));
-            }
-        } catch (e) {
-            console.error('Chat error', e);
-            appendMessage('assistant', 'Network error. Please try again.');
-        } finally {
-            setLoadingState(false);
-        }
-    }
-
-    openBtn.addEventListener('click', openChat);
-    closeBtn.addEventListener('click', closeChat);
-    sendBtn.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keydown', function(e){
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
-
-    // restore convo from sessionStorage (optional)
-    window.addEventListener('DOMContentLoaded', () => {
-        try {
-            const saved = JSON.parse(sessionStorage.getItem('agri_convo') || '[]');
-            if (Array.isArray(saved)) {
-                convoHistory = saved;
-                saved.forEach(m => appendMessage(m.role === 'user' ? 'user' : 'assistant', m.content));
-            }
-        } catch(e){}
-    });
-    window.addEventListener('beforeunload', () => {
-        try { sessionStorage.setItem('agri_convo', JSON.stringify(convoHistory)); } catch(e){}
-    });
-})();
-</script>
+    <div id="chat-bubble"><button id="openChat" title="Ask AgriAssist"><i class="fas fa-comment-dots" style="font-size:18px"></i></button></div>
+    <div id="chat-window" aria-hidden="true" role="dialog" aria-label="Chat"><div class="cw-header"><i class="fas fa-tractor"></i><div style="margin-left:6px;"><div style="font-weight:600">AgriAssist</div><div style="font-size:12px;opacity:0.9">Ask about crops...</div></div><button class="close-chat" id="closeChat" title="Close"><i class="fas fa-times"></i></button></div><div class="cw-body" id="chatMessages"><div class="small-hint">Tip: ask practical questions like "When should I water wheat?"</div></div><div class="cw-input"><textarea id="chatInput" placeholder="Type question..."></textarea><button class="send-btn" id="sendChat">Send</button></div></div>
+    <style>#chat-bubble { position: fixed; bottom: 20px; left: 20px; z-index: 1050; } #chat-bubble button { width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,0,0.15); } #chat-window { position: fixed; bottom: 90px; left: 20px; width: 320px; max-height: 480px; z-index:1050; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.18); display:none; flex-direction:column; overflow:hidden; } #chat-window .cw-header { background: linear-gradient(90deg,#2ecc71,#27ae60); color:#fff; padding:12px; display:flex; align-items:center; gap:8px; } #chat-window .close-chat { margin-left:auto; background:transparent; border:none; color:white; } #chat-window .cw-body { padding:12px; overflow-y:auto; flex:1; background:#f8f9fa; } .chat-msg { margin-bottom:10px; display:flex; } .chat-msg.user { justify-content:flex-end; } .chat-msg .bubble { max-width:78%; padding:8px 10px; border-radius:10px; } .chat-msg.user .bubble { background:#dcf8c6; } .chat-msg.bot .bubble { background:white; border:1px solid #e6e6e6; } #chat-window .cw-input { padding:8px; border-top:1px solid #eee; display:flex; gap:8px; } #chat-window textarea { resize:none; border-radius:6px; border:1px solid #ddd; padding:8px; flex:1; height:44px; } #chat-window .send-btn { border:none; background:#27ae60; color:white; padding:8px 12px; border-radius:6px; } .small-hint { font-size:12px; color:#666; margin-top:6px; }</style>
+    <script>(function(){const openBtn=document.getElementById('openChat'),closeBtn=document.getElementById('closeChat'),chatWindow=document.getElementById('chat-window'),sendBtn=document.getElementById('sendChat'),chatInput=document.getElementById('chatInput'),chatMessages=document.getElementById('chatMessages');let convoHistory=[];function openChat(){chatWindow.style.display='flex';chatWindow.setAttribute('aria-hidden','false');chatInput.focus();}function closeChat(){chatWindow.style.display='none';chatWindow.setAttribute('aria-hidden','true');}function appendMessage(role,text){const wrapper=document.createElement('div');wrapper.className='chat-msg '+(role==='user'?'user':'bot');const bubble=document.createElement('div');bubble.className='bubble';bubble.innerText=text;wrapper.appendChild(bubble);chatMessages.appendChild(wrapper);chatMessages.scrollTop=chatMessages.scrollHeight;}function setLoadingState(isLoading){sendBtn.disabled=isLoading;sendBtn.innerText=isLoading?'...':'Send';}async function sendMessage(){const text=chatInput.value.trim();if(!text)return;appendMessage('user',text);convoHistory.push({role:'user',content:text});chatInput.value='';setLoadingState(true);try{const res=await fetch('/chatbot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,history:convoHistory})});const data=await res.json();if(res.ok&&data.reply){appendMessage('assistant',data.reply);convoHistory.push({role:'assistant',content:data.reply});}else{appendMessage('assistant','Error: '+(data.error||res.status));}}catch(e){console.error(e);appendMessage('assistant','Network error.');}finally{setLoadingState(false);}}openBtn.addEventListener('click',openChat);closeBtn.addEventListener('click',closeChat);sendBtn.addEventListener('click',sendMessage);chatInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});window.addEventListener('DOMContentLoaded',()=>{try{const saved=JSON.parse(sessionStorage.getItem('agri_convo')||'[]');if(Array.isArray(saved)){convoHistory=saved;saved.forEach(m=>appendMessage(m.role==='user'?'user':'assistant',m.content));}}catch(e){}});window.addEventListener('beforeunload',()=>{try{sessionStorage.setItem('agri_convo',JSON.stringify(convoHistory));}catch(e){}});})();</script>
 </body>
 </html>

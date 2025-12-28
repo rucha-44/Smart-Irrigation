@@ -14,7 +14,7 @@
         "date": "05 Dec",
         "time": "06:00",
         "amount": 10.9,
-        "status": "Scheduled",
+        "status": "Completed",
         "warning": null
     },
     {
@@ -23,7 +23,7 @@
         "date": "06 Dec",
         "time": "06:00",
         "amount": 10.9,
-        "status": "Scheduled",
+        "status": "Completed",
         "warning": null
     },
     {
@@ -32,7 +32,7 @@
         "date": "07 Dec",
         "time": "06:00",
         "amount": 10.8,
-        "status": "Scheduled",
+        "status": "Completed",
         "warning": null
     },
     {
@@ -50,7 +50,7 @@
         "date": "05 Dec",
         "time": "06:00",
         "amount": 1.5,
-        "status": "Scheduled",
+        "status": "Completed",
         "warning": null
     },
     {
@@ -59,7 +59,7 @@
         "date": "06 Dec",
         "time": "06:00",
         "amount": 1.4,
-        "status": "Scheduled",
+        "status": "Completed",
         "warning": null
     },
     {
@@ -68,7 +68,7 @@
         "date": "07 Dec",
         "time": "06:00",
         "amount": 1.4,
-        "status": "Scheduled",
+        "status": "Completed",
         "warning": null
     },
     {
@@ -86,7 +86,7 @@
         "date": "05 Dec",
         "time": "06:00",
         "amount": 1.9,
-        "status": "Scheduled",
+        "status": "Completed",
         "warning": null
     },
     {
@@ -95,6 +95,24 @@
         "date": "05 Dec",
         "time": "06:00",
         "amount": 1.8,
+        "status": "Completed",
+        "warning": null
+    },
+    {
+        "id": 1765184232294,
+        "crop": "Rice",
+        "date": "08 Dec",
+        "time": "06:00",
+        "amount": 2.2,
+        "status": "Completed",
+        "warning": null
+    },
+    {
+        "id": 1765353572803,
+        "crop": "Coffee",
+        "date": "10 Dec",
+        "time": "06:00",
+        "amount": 4.3,
         "status": "Scheduled",
         "warning": null
     }

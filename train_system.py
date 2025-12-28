@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score, r2_score, mean_squared_error
 from utils.data_processor import IrrigationDataProcessor
 from models.architectures import build_advanced_dnn
 
+
 # Config
 DATA_PATH = 'multi_crop_realistic_dataset.csv'
 MODEL_DIR = 'models/saved/'
