@@ -80,6 +80,19 @@
         "land_area": "20",
         "crops": [
             "Coffee"
-        ]
+        ],
+        "full_name": "marty",
+        "contact": "9284237009",
+        "city": "Pune",
+        "soil_type": "Loamy"
+    },
+    {
+        "email": "ruchamusale@gmail.com",
+        "username": "rucha",
+        "password": "scrypt:32768:8:1$f9cOOQQJocYluHOu$3a4ad49d10dfe8b2b6609bc8c850ea37d660add28c8e25f86974035333c5c028223f0bd1813bea7df7d56dcc5bda42706337de66bc6a5bbc59b0abddf8ee4bcd",
+        "land_area": "",
+        "crops": [],
+        "full_name": "rucha",
+        "contact": "1234567890"
     }
 ]

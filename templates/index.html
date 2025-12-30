@@ -18,6 +18,24 @@
         body { top: 0 !important; }
     </style>
 </head>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4 px-3">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">
+            <i class="fas fa-leaf"></i> AgriAssist
+        </a>
+        
+        <div class="d-flex align-items-center">
+            <a href="/dashboard" class="btn btn-light btn-sm me-3 fw-bold text-success">
+                <i class="fas fa-columns"></i> My Dashboard
+            </a>
+            
+            <a href="/logout" class="text-white text-decoration-none small">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+</nav>
 <body>
     <div class="container-fluid main-container">
         <div class="row h-100">
@@ -453,6 +471,48 @@
             const conditionSelect = document.getElementById('soil_condition');
             const ageInput = document.getElementById('crop_age');
             const helpText = document.getElementById('age_help');
+
+
+            // ==========================================
+    // 🚀 AUTO-FILL LOGIC (FROM DASHBOARD)
+    // ==========================================
+    
+    window.addEventListener('DOMContentLoaded', async function() {
+        const params = new URLSearchParams(window.location.search);
+        
+        // Only run if coming from dashboard
+        if (params.get('source') === 'dashboard') {
+            console.log("🚀 Auto-filling from Dashboard...");
+
+            const crop = params.get('crop');
+            const city = params.get('city');
+            const soil = params.get('soil');
+            const age = params.get('age');
+
+            // 1. Fill Text/Select Inputs
+            if(crop) document.getElementById('crop_type').value = crop;
+            if(city) document.getElementById('cityInput').value = city;
+            if(soil) document.getElementById('soil_type').value = soil;
+            if(age)  document.getElementById('crop_age').value = age;
+
+            // 2. Trigger updates (important for validation logic)
+            // This enables the age input and sets max limits
+            const cropEvent = new Event('change');
+            document.getElementById('crop_type').dispatchEvent(cropEvent);
+
+            // 3. Fetch Weather Automatically
+            if(city) {
+                console.log("Fetching weather for:", city);
+                await fetchWeather(); // Re-use your existing function
+            }
+            
+            // 4. Scroll to the form so user sees it
+            document.getElementById('predictForm').scrollIntoView({ behavior: 'smooth' });
+            
+            // Optional: Alert user what to do next
+            // setTimeout(() => alert("Data loaded from Dashboard! Please select 'Soil Condition' and click Analyze."), 500);
+        }
+    });
 
             // Create Phase Badge
             let phaseBadge = document.getElementById('phase-badge');

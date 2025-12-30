@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Farm Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; }
+        .dashboard-header { background: #2c3e50; color: white; padding: 15px; border-radius: 8px; }
+        .warning-box { font-size: 0.85em; color: #dc3545; display: none; margin-top: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4 px-3">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">
+            <i class="fas fa-tractor"></i> Smart Farm
+        </a>
+        
+        <div class="d-flex align-items-center">
+            <a href="/planner" class="btn btn-outline-light btn-sm me-2">
+                <i class="fas fa-calendar-alt"></i> My Planner
+            </a>
+
+            <a href="/profile" class="btn btn-outline-light btn-sm me-2">
+                <i class="fas fa-user"></i> Profile
+            </a>
+
+            <a href="/logout" class="btn btn-danger btn-sm">
+                <i class="fas fa-power-off"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>My Active Fields</h3>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCropModal">
+            <i class="fas fa-plus"></i> Add New Field
+        </button>
+    </div>
+
+    <div class="row">
+        {% for crop in crops %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100 border-start border-5 border-{{ crop.color }}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title fw-bold text-success">{{ crop.name }}</h5>
+                        <span class="badge bg-{{ crop.color }}">{{ crop.age }} Days</span>
+                    </div>
+                    
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-map-marker-alt"></i> {{ crop.city }} &nbsp;|&nbsp; 
+                        <i class="fas fa-layer-group"></i> {{ crop.soil_type }}
+                    </p>
+                    
+                    <p class="small text-{{ crop.color }} fw-bold mb-3">
+                        {{ crop.advice }}
+                    </p>
+
+                    <a href="/?source=dashboard&crop={{ crop.name }}&city={{ crop.city }}&soil={{ crop.soil_type }}&age={{ crop.age }}" 
+                       class="btn btn-outline-primary w-100">
+                        <i class="fas fa-chart-line"></i> Analyze & Forecast
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="fas fa-seedling fa-3x mb-3"></i>
+            <h4>No active crops found.</h4>
+            <p>Add a field to start monitoring.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="addCropModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" action="/add_crop" method="POST">
+            <div class="modal-header">
+                <h5 class="modal-title">Register New Field</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                
+                <div class="mb-3">
+                    <label>Crop Name</label>
+                    <select name="crop_name" id="modalCrop" class="form-select" required onchange="validateModal()">
+                        <option value="" disabled selected>-- Select --</option>
+                        {% for crop_name in crop_data %}
+                        <option value="{{ crop_name }}">{{ crop_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>City (For Weather)</label>
+                    <div class="input-group">
+                        <input type="text" name="city" id="modalCity" class="form-control" placeholder="e.g. Pune" required onblur="checkModalRegion()">
+                        <button type="button" class="btn btn-outline-secondary" onclick="checkModalRegion()">Check</button>
+                    </div>
+                    <div id="regionWarning" class="warning-box"></div>
+                    <small id="detectedRegion" class="text-muted" style="display:none"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label>Soil Type</label>
+                    <select name="soil_type" id="modalSoil" class="form-select" required onchange="validateModal()">
+                        <option value="Clayey">Clayey</option>
+                        <option value="Loamy">Loamy</option>
+                        <option value="Sandy">Sandy</option>
+                        <option value="Silty">Silty</option>
+                        <option value="Peaty">Peaty</option>
+                        <option value="Chalky">Chalky</option>
+                    </select>
+                    <div id="soilWarning" class="warning-box"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Date of Sowing</label>
+                    <input type="date" name="sowing_date" class="form-control" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Save Field</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script id="crop-data-source" type="application/json">
+    {{ crop_data | tojson | safe }}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // --- Load Rules from Server ---
+    let CROP_DATA = {};
+    try {
+        CROP_DATA = JSON.parse(document.getElementById('crop-data-source').textContent);
+    } catch(e) { console.error("Error loading rules", e); }
+
+    let currentRegion = "";
+
+    // --- Region Detection Logic ---
+    async function checkModalRegion() {
+        const city = document.getElementById('modalCity').value;
+        const regionLabel = document.getElementById('detectedRegion');
+        
+        if(!city) return;
+
+        try {
+            // Ask server to detect region for this city
+            const res = await fetch('/get_weather', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({city: city})
+            });
+            const data = await res.json();
+            
+            if(data.detected_region) {
+                currentRegion = data.detected_region;
+                regionLabel.style.display = 'block';
+                regionLabel.innerText = `Detected Region: ${currentRegion}`;
+                validateModal(); // Re-validate with new region
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    // --- Validation Logic (The Warning System) ---
+    function validateModal() {
+        const crop = document.getElementById('modalCrop').value;
+        const soil = document.getElementById('modalSoil').value;
+        
+        const soilWarn = document.getElementById('soilWarning');
+        const regionWarn = document.getElementById('regionWarning');
+        const soilInput = document.getElementById('modalSoil');
+        const cityInput = document.getElementById('modalCity');
+
+        if (!crop || !CROP_DATA[crop]) return;
+        const rules = CROP_DATA[crop];
+
+        // 1. Validate Soil
+        if (rules.ideal_soil && !rules.ideal_soil.includes(soil)) {
+            soilInput.style.border = "2px solid #dc3545"; // Red Border
+            soilWarn.style.display = "block";
+            soilWarn.innerText = `⚠️ ${crop} grows poorly in ${soil} soil. Ideal: ${rules.ideal_soil.join(', ')}`;
+        } else {
+            soilInput.style.border = "1px solid #ced4da"; // Reset
+            soilWarn.style.display = "none";
+        }
+
+        // 2. Validate Region (If we know it)
+        if (currentRegion && rules.ideal_regions && rules.ideal_regions[0] !== 'All') {
+            if (!rules.ideal_regions.includes(currentRegion)) {
+                cityInput.style.border = "2px solid #dc3545"; // Red Border
+                regionWarn.style.display = "block";
+                regionWarn.innerText = `⚠️ ${currentRegion} is not optimal for ${crop}. Ideal: ${rules.ideal_regions.join(', ')}`;
+            } else {
+                cityInput.style.border = "1px solid #ced4da"; // Reset
+                regionWarn.style.display = "none";
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

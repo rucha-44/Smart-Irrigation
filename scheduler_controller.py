@@ -1,9 +1,9 @@
+from flask import Blueprint, request, jsonify, session
 import json
 import os
 from datetime import datetime
-from flask import Blueprint, request, jsonify, session
 
-# 1. Define the Blueprint (This allows app.py to register it)
+# 1. Define the Blueprint
 scheduler_bp = Blueprint('scheduler', __name__)
 
 SCHEDULE_FILE = 'schedules.json'
@@ -28,22 +28,21 @@ def get_user_tasks(user_email):
     Returns a list of tasks specifically for the logged-in user.
     """
     all_tasks = load_tasks()
-    # Filter tasks by email
-    user_tasks = [t for t in all_tasks if t.get("user") == user_email]
+    # ⚠️ FIXED: Changed "user" to "user_email" to match app.py
+    user_tasks = [t for t in all_tasks if t.get("user_email") == user_email]
     
     # Sort by date (Oldest first)
     try:
         user_tasks.sort(key=lambda x: datetime.strptime(x['date'], '%Y-%m-%d'), reverse=False)
     except:
-        pass # Handle potential date format errors gracefully
+        pass 
         
     return user_tasks
 
-# --- API ROUTES (For JavaScript / Frontend) ---
+# --- API ROUTES ---
 
 @scheduler_bp.route('/get_tasks', methods=['GET'])
 def api_get_tasks():
-    """API Endpoint for scheduler.html to fetch tasks via AJAX"""
     if 'user' not in session:
         return jsonify([])
     tasks = get_user_tasks(session['user'])
@@ -52,32 +51,32 @@ def api_get_tasks():
 @scheduler_bp.route('/add_task', methods=['POST'])
 def api_add_task():
     if 'user' not in session:
-        return jsonify({"status": "error", "message": "Unauthorized"})
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
     
     data = request.json
     user_email = session['user']
     tasks = load_tasks()
     
-    # Generate a unique ID (timestamp based)
+    # Generate ID
     task_id = int(datetime.now().timestamp() * 1000)
     
     new_task = {
         "id": task_id,
-        "user": user_email,
-        "date": data['date'],
+        "user_email": user_email, # ⚠️ FIXED: Standardized key
+        "date": data.get('date'),
         "time": data.get('time', '06:00'),
-        "crop": data['crop'],
-        "amount": data['amount'],
+        "crop": data.get('crop'),
+        "amount": data.get('amount'),
         "status": "Pending",
         "warning": data.get('warning', '')
     }
     
     # Check for duplicates
     for t in tasks:
-        if (t["user"] == user_email and 
-            t["date"] == new_task["date"] and 
-            t["crop"] == new_task["crop"] and 
-            str(t["amount"]) == str(new_task["amount"])):
+        # ⚠️ FIXED: Check against "user_email"
+        if (t.get("user_email") == user_email and 
+            t.get("date") == new_task["date"] and 
+            t.get("crop") == new_task["crop"]):
             return jsonify({"status": "duplicate", "message": "Task already exists"})
 
     tasks.append(new_task)
@@ -86,36 +85,40 @@ def api_add_task():
 
 @scheduler_bp.route('/delete_task', methods=['POST'])
 def api_delete_task():
-    if 'user' not in session:
-        return jsonify({"status": "error"})
+    if 'user' not in session: return jsonify({"status": "error"})
     
     data = request.json
-    task_id = str(data.get('id') or data.get('task_id')) # Handle both key names
+    # Handle both string/int ID formats safely
+    try:
+        task_id = int(data.get('id') or data.get('task_id'))
+    except:
+        return jsonify({"status": "error", "message": "Invalid ID"})
+
     user_email = session['user']
-    
     tasks = load_tasks()
-    # Keep tasks that DO NOT match the ID/User combo
-    updated_tasks = [t for t in tasks if not (str(t["id"]) == task_id and t["user"] == user_email)]
     
-    if len(tasks) == len(updated_tasks):
-        return jsonify({"status": "error", "message": "Task not found"})
-        
+    # Keep tasks that DO NOT match the ID
+    updated_tasks = [t for t in tasks if not (t["id"] == task_id and t.get("user_email") == user_email)]
+    
     save_tasks(updated_tasks)
     return jsonify({"status": "success"})
 
 @scheduler_bp.route('/complete_task', methods=['POST'])
 def api_complete_task():
-    if 'user' not in session:
-        return jsonify({"status": "error"})
+    if 'user' not in session: return jsonify({"status": "error"})
         
     data = request.json
-    task_id = str(data.get('id'))
+    try:
+        task_id = int(data.get('id'))
+    except:
+        return jsonify({"status": "error"})
+
     user_email = session['user']
-    
     tasks = load_tasks()
+    
     found = False
     for t in tasks:
-        if str(t["id"]) == task_id and t["user"] == user_email:
+        if t["id"] == task_id and t.get("user_email") == user_email:
             t["status"] = "Completed"
             found = True
             break
