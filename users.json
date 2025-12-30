@@ -72,5 +72,14 @@
         "crops": [
             "sugercane"
         ]
+    },
+    {
+        "email": "martySupreme@gmail.com",
+        "username": "",
+        "password": "scrypt:32768:8:1$NqTE8M0hVIX9OOn3$63a8b55e3183754bc42ed17bb9725dd92161b8f188c8c7ed32c5d1940efe5e26a19f244623c0b4cb59c5d56129d622915c4d2832c6ad48a975a91e9efe7b15f1",
+        "land_area": "20",
+        "crops": [
+            "Coffee"
+        ]
     }
 ]
