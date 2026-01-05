@@ -93,6 +93,15 @@
         "land_area": "",
         "crops": [],
         "full_name": "rucha",
-        "contact": "1234567890"
+        "contact": "9284237009"
+    },
+    {
+        "email": "mansi.chitari@cumminscollege.in",
+        "username": "mansi_chitari",
+        "password": "scrypt:32768:8:1$xWi0nPk79dJcmrJ3$f0f6684055bf20487edb267e6c4594fda690147304265ebaad7603d37b5ef6c316b4aadd5ed239b3ad50287e278cd7f5648a79b1fdac7abbb7b40ea055ba8654",
+        "land_area": "",
+        "crops": [],
+        "full_name": "mansi_chitari",
+        "contact": "9284237009"
     }
 ]

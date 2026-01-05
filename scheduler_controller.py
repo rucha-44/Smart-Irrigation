@@ -2,9 +2,12 @@ from flask import Blueprint, request, jsonify, session
 import json
 import os
 from datetime import datetime
+from services.notification_service import NotificationService
 
 # 1. Define the Blueprint
 scheduler_bp = Blueprint('scheduler', __name__)
+
+notifier = NotificationService()
 
 SCHEDULE_FILE = 'schedules.json'
 
@@ -21,6 +24,30 @@ def load_tasks():
 def save_tasks(tasks):
     with open(SCHEDULE_FILE, 'w') as f:
         json.dump(tasks, f, indent=4)
+
+# --- NEW HELPER: GET USER PHONE ---
+# --- NEW HELPER: GET USER PHONE ---
+def get_user_phone(user_email):
+    """Finds the contact number for the logged-in user."""
+    users_file_path = 'users.json'  # <--- Defined explicitly here to fix the error
+    
+    if not os.path.exists(users_file_path): 
+        print("❌ Users file not found.")
+        return None
+        
+    try:
+        with open(users_file_path, 'r') as f:
+            users = json.load(f)
+            # Find the user object matching the email
+            user = next((u for u in users if u["email"] == user_email), None)
+            
+            if user:
+                return user.get("contact")
+            return None
+    except Exception as e:
+        print(f"❌ Error reading users file: {e}")
+        return None
+    
 
 # --- LOGIC FUNCTIONS (Exported for app.py) ---
 def get_user_tasks(user_email):
@@ -81,7 +108,29 @@ def api_add_task():
 
     tasks.append(new_task)
     save_tasks(tasks)
-    return jsonify({"status": "success", "message": "Task scheduled"})
+    # ---------------------------------------------------------
+    # 🔔 NEW: SEND WHATSAPP NOTIFICATION
+    # ---------------------------------------------------------
+    try:
+        user_phone = get_user_phone(user_email)
+        
+        if user_phone:
+            print(f"📤 Sending Template to {user_phone}...")
+            
+            # Send the template with dynamic data
+            notifier.send_irrigation_alert(
+                to_number=user_phone,
+                var_1=new_task['crop'],   # Variable {{1}} (e.g., "Cotton")
+                var_2=new_task['date']    # Variable {{2}} (e.g., "2025-01-05")
+            )
+        else:
+            print("⚠️ No phone number found.")
+            
+    except Exception as e:
+        print(f"❌ Notification Logic Error: {e}")
+    # ---------------------------------------------------------
+
+    return jsonify({"status": "success", "message": "Task scheduled & WhatsApp sent"})
 
 @scheduler_bp.route('/delete_task', methods=['POST'])
 def api_delete_task():
@@ -127,3 +176,4 @@ def api_complete_task():
         save_tasks(tasks)
         return jsonify({"status": "success"})
     return jsonify({"status": "error"})
+

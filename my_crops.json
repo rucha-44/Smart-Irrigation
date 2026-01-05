@@ -43,5 +43,23 @@
         "soil_type": "Loamy",
         "sowing_date": "2025-12-24",
         "status": "Active"
+    },
+    {
+        "id": 1767614038,
+        "user_email": "ruchamusale@gmail.com",
+        "crop_name": "Cotton",
+        "city": "Jalgaon",
+        "soil_type": "Clayey",
+        "sowing_date": "2026-01-03",
+        "status": "Active"
+    },
+    {
+        "id": 1767618869,
+        "user_email": "mansi.chitari@cumminscollege.in",
+        "crop_name": "Coffee",
+        "city": "assam",
+        "soil_type": "Loamy",
+        "sowing_date": "2026-01-01",
+        "status": "Active"
     }
 ]

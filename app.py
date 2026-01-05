@@ -6,6 +6,7 @@ import tensorflow as tf
 import os
 import json
 import statistics
+import random
 from datetime import datetime 
 from werkzeug.security import generate_password_hash, check_password_hash
 from services.weather_service import WeatherService
@@ -14,6 +15,8 @@ from groq import Groq
 from flask_cors import CORS
 from scheduler_controller import scheduler_bp, get_user_tasks
 from geopy.geocoders import Nominatim
+from services.notification_service import NotificationService
+notifier = NotificationService()
 
 # Initialize Geocoder
 geolocator = Nominatim(user_agent="smart_irrigation_app")
@@ -512,19 +515,70 @@ def login():
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
+        
         users = load_users()
+        user_found = None
+        
+        # 1. Check Credentials
         for u in users:
             if u["email"] == email and check_password_hash(u["password"], password):
-                session.permanent = True
-                session["user"] = u["email"]
+                user_found = u
+                break
+        
+        if user_found:
+            # 2. Check if they have a phone number for OTP
+            contact = user_found.get("contact")
+            if contact:
+                # Generate 6-digit OTP
+                otp_code = str(random.randint(100000, 999999))
                 
-                # ---------------------------------------------------------
-                # CHANGE HERE: Redirect to "dashboard" instead of "home"
-                # ---------------------------------------------------------
-                return redirect(url_for("dashboard")) 
+                # Store in Session (Temporary)
+                session["pending_user"] = email
+                session["otp"] = otp_code
                 
-        error = "Invalid email or password!"
+                # Send WhatsApp
+                success = notifier.send_otp(contact, otp_code)
+                
+                if success:
+                    return redirect(url_for("verify_otp"))
+                else:
+                    error = "Failed to send OTP. Check internet/Twilio settings."
+            else:
+                # Fallback: If no phone number, just log in (or force them to add one)
+                session["user"] = email
+                session.permanent = False
+                return redirect(url_for("dashboard"))
+
+        else:
+            error = "Invalid email or password!"
+
     return render_template("login.html", error=error)
+
+@app.route("/verify_otp", methods=["GET", "POST"])
+def verify_otp():
+    if "pending_user" not in session or "otp" not in session:
+        return redirect(url_for("login"))
+    
+    error = None
+    
+    if request.method == "POST":
+        user_otp = request.form.get("otp")
+        
+        # 1. Verify Code
+        if user_otp == session["otp"]:
+            # Success! Log them in for real.
+            session["user"] = session["pending_user"]
+            session.permanent = False
+            
+            # Clear temporary session data
+            session.pop("pending_user", None)
+            session.pop("otp", None)
+            
+            return redirect(url_for("dashboard"))
+        else:
+            error = "❌ Invalid OTP. Please try again."
+            
+    return render_template("verify_otp.html", error=error)
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
