@@ -61,5 +61,49 @@
         "soil_type": "Loamy",
         "sowing_date": "2026-01-01",
         "status": "Active"
+    },
+    {
+        "id": 1767635525,
+        "user_email": "mansi.chitari@cumminscollege.in",
+        "crop_name": "Rice",
+        "city": "odisha",
+        "soil_type": "Clayey",
+        "sowing_date": "2025-12-19",
+        "status": "Active"
+    },
+    {
+        "id": 1767685016,
+        "user_email": "mansi.chitari@cumminscollege.in",
+        "crop_name": "Rice",
+        "city": "ladakh",
+        "soil_type": "Clayey",
+        "sowing_date": "2026-01-01",
+        "status": "Active"
+    },
+    {
+        "id": 1767688979320,
+        "user_email": "mansi.chitari@cumminscollege.in",
+        "name": "Rice",
+        "crop_name": "Rice",
+        "city": "leh",
+        "region": "North",
+        "soil_type": "Loamy",
+        "sowing_date": "2026-01-02",
+        "age": 4,
+        "viability": "Marginal",
+        "advice": "Caution: North is marginal for Rice.",
+        "color": "warning"
+    },
+    {
+        "user_email": "mansi.chitari@cumminscollege.in",
+        "name": "Cotton",
+        "city": "assam",
+        "region": "North East",
+        "soil_type": "Clayey",
+        "sowing_date": "2026-01-06",
+        "age": 0,
+        "viability": "Unsuitable",
+        "advice": "Warning: Cotton is not suitable for North East.",
+        "color": "danger"
     }
 ]

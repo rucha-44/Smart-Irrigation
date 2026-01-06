@@ -69,9 +69,13 @@ CROP_DATA = {
     'Cotton': {
         'days': [30, 50, 60, 40], 'kc': [0.35, 1.20, 0.60],
         'max_days': 180,
-        # Grown in Black soil belts: Gujarat (West), Punjab/Haryana (North West), 
-        # MP (Central), Telangana/Karnataka (South)
-        'ideal_regions': ['West', 'Central', 'North', 'South', 'North West'],
+        # 🟢 NEW: Suitability Logic
+        'suitability': {
+            'ideal': ['West', 'Central', 'South', 'North West', 'South West'],
+            'marginal': ['North', 'South East'],
+            'unsuitable': ['North East', 'East']
+        },
+        'ideal_regions': ['West', 'Central', 'North', 'South', 'North West', 'South West'],
         'ideal_soil': ['Clayey', 'Loamy'],
         'ideal_condition': ['Dry', 'Moist'],
         'stages': [
@@ -84,7 +88,12 @@ CROP_DATA = {
     'Coffee': {
         'days': [30, 90, 150, 95], 'kc': [0.90, 1.10, 0.95],
         'max_days': 365,
-        # Hills of Karnataka/Kerala (South West), TN (South East), and Assam (North East)
+        # 🟢 NEW: Suitability Logic
+        'suitability': {
+            'ideal': ['South West', 'South', 'South East', 'North East'],
+            'marginal': [],
+            'unsuitable': ['North', 'West', 'Central', 'East', 'North West']
+        },
         'ideal_regions': ['South', 'South West', 'South East', 'North East'],
         'ideal_soil': ['Loamy'],
         'ideal_condition': ['Moist'],
@@ -98,8 +107,12 @@ CROP_DATA = {
     'Sugarcane': {
         'days': [35, 60, 180, 90], 'kc': [0.40, 1.25, 0.75],
         'max_days': 365,
-        # UP (North), Maharashtra (West), South India
-        'ideal_regions': ['North', 'West', 'South', 'Central', 'North West', 'South East'],
+        'suitability': {
+            'ideal': ['North', 'West', 'South', 'Central', 'South West', 'South East'],
+            'marginal': ['North West'],
+            'unsuitable': ['North East', 'East']
+        },
+        'ideal_regions': ['North', 'West', 'South', 'Central', 'North West', 'South East', 'SouthWest'],
         'ideal_soil': ['Loamy', 'Clayey'],
         'ideal_condition': ['Moist', 'Wet'],
         'stages': [
@@ -112,7 +125,11 @@ CROP_DATA = {
     'Rice': {
         'days': [30, 30, 40, 20], 'kc': [1.05, 1.20, 0.90],
         'max_days': 120, 
-        # Needs high water. WB/Odisha (East), Coastal AP (South East), Assam (North East)
+        'suitability': {
+            'ideal': ['South', 'East', 'North East', 'South East', 'South West', 'Central'],
+            'marginal': ['North', 'West'],
+            'unsuitable': ['North West', 'Ladakh'] 
+        },
         'ideal_regions': ['East', 'South', 'Central', 'North East', 'South East', 'South West'],
         'ideal_soil': ['Clayey', 'Silty', 'Loamy'],
         'ideal_condition': ['Wet'],
@@ -120,7 +137,12 @@ CROP_DATA = {
     },
     'Wheat': {
         'days': [20, 35, 40, 25], 'kc': [0.30, 1.15, 0.25],
-        'max_days': 120, # Winter crop. Indo-Gangetic plains (Punjab, Haryana, UP)
+        'max_days': 120, 
+        'suitability': {
+            'ideal': ['North', 'North West', 'Central', 'East'],
+            'marginal': ['West'],
+            'unsuitable': ['South', 'South West', 'South East', 'North East']
+        },
         'ideal_regions': ['North', 'North West', 'Central', 'East'],
         'ideal_soil': ['Loamy', 'Clayey'],
         'ideal_condition': ['Moist'],
@@ -128,7 +150,12 @@ CROP_DATA = {
     },
     'Maize': {
         'days': [25, 40, 50, 35], 'kc': [0.30, 1.20, 0.60],
-        'max_days': 150, # Versatile: Karnataka (South), MP (Central), Bihar (East)
+        'max_days': 150, 
+        'suitability': {
+            'ideal': ['North', 'South', 'East', 'West', 'Central'],
+            'marginal': ['North East', 'South West'],
+            'unsuitable': []
+        },
         'ideal_regions': ['North', 'South', 'Central', 'West', 'North West', 'East'],
         'ideal_soil': ['Loamy', 'Sandy'],
         'ideal_condition': ['Moist'],
@@ -136,7 +163,12 @@ CROP_DATA = {
     },
     'Tomato': {
         'days': [15, 25, 30, 20], 'kc': [0.60, 1.15, 0.80],
-        'max_days': 90, # Grown almost everywhere, but loves moderate climates
+        'max_days': 90, 
+        'suitability': {
+            'ideal': ['North', 'South', 'East', 'West', 'Central', 'North West', 'South East'],
+            'marginal': ['North East', 'South West'],
+            'unsuitable': []
+        },
         'ideal_regions': ['North', 'South', 'East', 'West', 'Central', 'South West', 'South East'],
         'ideal_soil': ['Loamy', 'Sandy'],
         'ideal_condition': ['Moist'],
@@ -144,7 +176,12 @@ CROP_DATA = {
     },
     'Potato': {
         'days': [25, 30, 45, 20], 'kc': [0.50, 1.15, 0.75],
-        'max_days': 120, # UP (North) and West Bengal (East) are the biggest producers
+        'max_days': 120, 
+        'suitability': {
+            'ideal': ['North', 'East', 'North East', 'Central', 'North West'],
+            'marginal': ['West'],
+            'unsuitable': ['South', 'South East', 'South West']
+        },
         'ideal_regions': ['North', 'East', 'North East', 'Central', 'North West'],
         'ideal_soil': ['Sandy', 'Loamy'],
         'ideal_condition': ['Moist'],
@@ -293,16 +330,18 @@ def calculate_irrigation_needs(crop, soil, region, age, weather_data):
     model_region = REGION_MAPPING.get(region, 'Central')
     # 1. Prepare Input for AI Model (Assume avg moisture if unknown)
     moist = 45.0 
-    
+    safe_rain = weather_data.get("rainfall", 0.0)
+    safe_temp = weather_data.get("temperature", 25.0)
+
     input_data = {
         "CROP_TYPE": [crop], 
         "SOIL_TYPE": [soil], 
         "REGION": [model_region],
-        "TEMPERATURE": [weather_data["temperature"]],
-        "HUMIDITY": [weather_data["humidity"]],
-        "RAINFALL": [weather_data["rainfall"]],
-        "WIND_SPEED": [weather_data["wind_speed"]],
-        "WEATHER_CONDITION": [weather_data["weather_condition"]],
+       "TEMPERATURE": [weather_data.get("temperature", 25.0)],
+        "HUMIDITY": [weather_data.get("humidity", 50.0)],
+        "RAINFALL": [weather_data.get("rainfall", 0.0)],
+        "WIND_SPEED": [weather_data.get("wind_speed", 5.0)],
+        "WEATHER_CONDITION": [weather_data.get("weather_condition", "Sunny")],
         "SOIL_MOISTURE": [moist]
     }
     
@@ -323,8 +362,9 @@ def calculate_irrigation_needs(crop, soil, region, age, weather_data):
         # Ensure minimum effective water
         if final_water < 1.0: final_water = 3.5 * kc
             
-    # Rain Override
-    if weather_data["rainfall"] > 10:
+   # 🛡️ RAIN OVERRIDE (Fixed Line)
+    # Replaced 'weather_data["rainfall"]' with 'safe_rain'
+    if safe_rain > 10:
         needs_water = False
         final_water = 0.0
         advice = "Rain Detected (Skip)"
@@ -353,56 +393,52 @@ def home():
 
 @app.route("/dashboard")
 def dashboard():
-    # 1. Check Login
     if "user" not in session: return redirect(url_for("login"))
     
-    # 2. Load User
     users = load_users()
     current_user = next((u for u in users if u["email"] == session["user"]), None)
     if not current_user:
         session.clear()
         return redirect(url_for("login"))
 
-    # 3. Load Crops
     all_crops = load_my_crops()
     my_crops = [c for c in all_crops if c["user_email"] == session["user"]]
     
     processed_crops = []
     
-    # 4. Process Each Crop (Fetch Weather individually)
     for crop in my_crops:
-        # A. Calculate Age
         try:
             sowing = datetime.strptime(crop["sowing_date"], "%Y-%m-%d")
             age = max(0, (datetime.now() - sowing).days)
         except: age = 0
             
-        # B. Fetch Weather SPECIFIC to this crop's location
-        # (This replaces the old global weather fetch)
         crop_city = crop.get("city", "")
         weather_data = weather_service.get_weather_data(crop_city)
         
-        # Detect Region fallback
+        # Safe fallback for region
         if "detected_region" not in weather_data:
-            weather_data["detected_region"] = "Central" 
+            weather_data["detected_region"] = crop.get("region", "Central")
 
-        # C. Run Logic
+        # 🛡️ FIX: Safe Name Extraction (Prevents KeyError)
+        # Tries "crop_name" first, falls back to "name"
+        safe_name = crop.get("crop_name", crop.get("name", "Unknown Crop"))
+
         result = calculate_irrigation_needs(
-            crop=crop["crop_name"],
+            crop=safe_name,  # <--- Use safe_name here
             soil=crop["soil_type"],
             region=weather_data["detected_region"],
             age=age,
             weather_data=weather_data
         )
         
-        # Color Logic
         status_color = "success"
         if result["needs_water"]: status_color = "danger"
         elif "Rain" in result["advice"]: status_color = "primary"
 
         processed_crops.append({
-            "id": crop["id"],
-            "name": crop["crop_name"],
+            "id": crop.get("id", random.randint(1000,9999)),
+            "name": safe_name,       # <--- Use safe_name here
+            "crop_name": safe_name,  # <--- Use safe_name here
             "city": crop_city,
             "soil_type": crop["soil_type"],
             "age": age,
@@ -410,35 +446,77 @@ def dashboard():
             "water_amount": result["water_amount"],
             "advice": result["advice"],
             "needs_water": result["needs_water"],
-            "color": status_color
+            "color": status_color,
+            "viability": crop.get("viability", "Ideal") 
         })
 
-    # 5. Return (No global weather passed)
     return render_template("dashboard.html", 
                            user=current_user, 
                            crops=processed_crops, 
                            crop_data=CROP_DATA)
 
-@app.route("/add_crop", methods=["POST"])
+@app.route('/add_crop', methods=['POST'])
 def add_crop():
-    if "user" not in session: return redirect(url_for("login"))
+    if 'user' not in session: return redirect(url_for('login'))
     
-    data = request.form
-    my_crops = load_my_crops()
+    user_email = session['user']
     
+    # 1. Get Form Data
+    crop_name = request.form.get('crop_name')
+    city = request.form.get('city')
+    region = request.form.get('region') # <--- Get the region from hidden input
+    soil_type = request.form.get('soil_type')
+    sowing_date = request.form.get('sowing_date')
+    
+    # 2. Calculate Age
+    sowing_dt = datetime.strptime(sowing_date, '%Y-%m-%d')
+    age = (datetime.now() - sowing_dt).days
+    
+    # 3. 🚩 CALCULATE VIABILITY (Server-Side)
+    viability_status = "Ideal" # Default
+    advice_text = "Conditions look good."
+    color = "success"
+
+    if crop_name in CROP_DATA:
+        suitability = CROP_DATA[crop_name].get("suitability", {})
+        
+        # Normalize Region (Handle "Ladakh" edge case)
+        check_region = region if region else "Central"
+        
+        # Specific check for Ladakh if API returns it directly
+        if "ladakh" in city.lower():
+             check_region = "North West" # Map Ladakh to North West internally if needed
+
+        if check_region in suitability.get("unsuitable", []):
+            viability_status = "Unsuitable"
+            advice_text = f"Warning: {crop_name} is not suitable for {check_region}."
+            color = "danger"
+        elif check_region in suitability.get("marginal", []):
+            viability_status = "Marginal"
+            advice_text = f"Caution: {check_region} is marginal for {crop_name}."
+            color = "warning"
+
+    # 4. Create Object
     new_crop = {
-        "id": int(datetime.now().timestamp()),
-        "user_email": session["user"],
-        "crop_name": data.get("crop_name"),
-        "city": data.get("city"),           # Specific City for this crop
-        "soil_type": data.get("soil_type"), # Specific Soil for this crop
-        "sowing_date": data.get("sowing_date"),
-        "status": "Active"
+        "user_email": user_email,
+        "name": crop_name,
+        "city": city,
+        "region": region, # Save the region
+        "soil_type": soil_type,
+        "sowing_date": sowing_date,
+        "age": age,
+        "viability": viability_status, # <--- Save the calculated flag
+        "advice": advice_text,
+        "color": color
     }
     
-    my_crops.append(new_crop)
-    save_my_crops(my_crops)
-    return redirect(url_for("dashboard"))
+    # 5. Save to List/File
+    # (Assuming you use a list named 'user_crops' or load/save from json)
+    users_crops = load_my_crops() # Use your existing loader
+    users_crops.append(new_crop)
+    save_my_crops(users_crops)      # Use your existing saver
+    
+    return redirect(url_for('dashboard'))
 
 @app.route("/predict_saved", methods=["POST"])
 def predict_saved():

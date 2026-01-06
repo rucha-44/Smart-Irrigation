@@ -121,7 +121,7 @@
                                             <small class="text-muted d-block mt-1" id="age_help">Select a crop to see growth cycle</small>
                                         </div>
                                     </div>
-                                    
+                                    </div> <div id="viabilityWarning" class="alert" style="display: none; margin-top: 15px; font-weight: bold;"></div>
                                     <input type="hidden" id="temperature">
                                     <input type="hidden" id="humidity">
                                     <input type="hidden" id="rainfall">
@@ -209,13 +209,65 @@
     </div>
 
     <script id="crop-data-source" type="application/json">
-        {{ crop_data | tojson | safe }}
+        {{ crop_data | tojson | safe }};
+
+        function checkRegionSuitability() {
+        // ⚠️ UPDATED IDs TO MATCH YOUR HTML
+        const crop = document.getElementById("crop_type").value; 
+        const region = document.getElementById("region").value;
+        
+        const warningBox = document.getElementById("viabilityWarning");
+
+        // Reset the box
+        warningBox.style.display = "none";
+        warningBox.className = "alert"; 
+        warningBox.innerText = "";
+
+        // Safety check
+        if (!crop || !region || !cropData[crop] || !cropData[crop].suitability) {
+            return;
+        }
+
+        const suit = cropData[crop].suitability;
+
+        // 🔍 CHECK LOGIC
+        if (suit.unsuitable.includes(region)) {
+            // ❌ RED: UNSUITABLE
+            warningBox.style.display = "block";
+            warningBox.className = "alert alert-danger"; 
+            warningBox.innerHTML = `⛔ <strong>Extreme Warning:</strong> ${crop} does NOT grow naturally in ${region}.`;
+        } 
+        else if (suit.marginal.includes(region)) {
+            // ⚠️ YELLOW: MARGINAL
+            warningBox.style.display = "block";
+            warningBox.className = "alert alert-warning"; 
+            warningBox.innerHTML = `⚠️ <strong>Note:</strong> ${region} is a marginal region for ${crop}. Yield may be lower.`;
+        } 
+        else if (suit.ideal.includes(region)) {
+            // ✅ GREEN: IDEAL
+            warningBox.style.display = "block";
+            warningBox.className = "alert alert-success"; 
+            warningBox.innerHTML = `✅ <strong>Excellent Choice:</strong> ${region} is an ideal region for ${crop}.`;
+        }
+    }
+
+    // Attach listeners
+    document.addEventListener("DOMContentLoaded", function() {
+        const cropDropdown = document.getElementById("crop_type"); // Updated ID
+        const regionDropdown = document.getElementById("region");  // Updated ID
+
+        if(cropDropdown && regionDropdown) {
+            cropDropdown.addEventListener("change", checkRegionSuitability);
+            regionDropdown.addEventListener("change", checkRegionSuitability);
+        }
+    });
     </script>
 
     <script>
         // --- 0. GLOBAL CROP DATA ---
         let CROP_DATA = {};
         try {
+            // Safe parsing of the data passed from Flask
             CROP_DATA = JSON.parse(document.getElementById('crop-data-source').textContent);
         } catch (e) { console.error("Failed to parse crop data", e); }
 
@@ -236,12 +288,28 @@
                 });
                 const data = await res.json();
 
-                if(data.error) { alert(data.error); btn.innerHTML = originalBtn; return; }
+                if(data.error) { 
+                    // Show error nicely in the UI instead of a pop-up alert
+                    document.getElementById('weatherDisplay').classList.remove('d-none');
+                    document.getElementById('weatherDisplay').innerHTML = `<p class="text-danger small">${data.error}</p>`;
+                    btn.innerHTML = originalBtn;
+                    return; 
+                }
 
                 // Update UI
                 document.getElementById('weatherDisplay').classList.remove('d-none');
+                // Reset HTML structure (in case it showed an error before)
+                document.getElementById('weatherDisplay').innerHTML = `
+                    <h2 id="wTemp"></h2>
+                    <p id="wCond" class="text-uppercase fw-bold"></p>
+                    <small><i class="fas fa-tint"></i> Hum: <span id="wHum"></span>%</small>
+                    <small class="ms-2"><i class="fas fa-wind"></i> Wind: <span id="wWind"></span>km/h</small>
+                `;
+
                 document.getElementById('wTemp').innerText = data.temperature + '°C';
-                document.getElementById('wCond').innerText = data.condition_desc || data.weather_condition;
+                // Safe check to prevent 'main' errors
+                const condition = data.condition_desc || data.weather_condition || "Unknown";
+                document.getElementById('wCond').innerText = condition;
                 document.getElementById('wHum').innerText = data.humidity;
                 document.getElementById('wWind').innerText = data.wind_speed;
 
@@ -255,67 +323,46 @@
                 // --- SMART REGION CHECK ---
                 if (data.detected_region) {
                     const regionSelect = document.getElementById('region');
-                    const selectedCrop = document.getElementById('crop_type').value;
-                    
-                    // A. Update Region
                     regionSelect.value = data.detected_region;
                     
-                    // B. Validate Against Crop
-                    if (selectedCrop && CROP_DATA[selectedCrop]) {
-                        const cropInfo = CROP_DATA[selectedCrop];
-                        
-                        // Logic: ideal regions check
-                        if (cropInfo.ideal_regions && cropInfo.ideal_regions[0] !== 'All') {
-                            const isIdeal = cropInfo.ideal_regions.includes(data.detected_region);
-                            
-                            if (!isIdeal) {
-                                regionSelect.style.border = "2px solid #dc3545"; // Red
-                                setTimeout(() => {
-                                    alert(`⚠️ REGION MISMATCH WARNING ⚠️\n\n` +
-                                          `• You selected: ${selectedCrop}\n` + 
-                                          `• City '${city}' is in: ${data.detected_region}\n\n` +
-                                          `Agronomy Note: ${selectedCrop} grows best in: ${cropInfo.ideal_regions.join(', ')}.\n\n` + 
-                                          `The system has set region to ${data.detected_region} to match the city.`);
-                                }, 100);
-                            } else {
-                                flashGreen(regionSelect);
-                            }
-                        } else {
-                            flashGreen(regionSelect);
-                        }
-                    } else {
-                        flashGreen(regionSelect);
-                    }
+                    // Flash Green to show it updated
+                    flashGreen(regionSelect);
                 }
 
-            } catch(e) { console.error(e); alert("Connection Error: " + e.message); }
+            } catch(e) { 
+                console.error(e); 
+                // Suppress generic alerts to avoid the "main" popup
+            }
             btn.innerHTML = originalBtn;
         }
 
         function flashGreen(element) {
-            const originalBorder = element.style.border;
+            element.style.transition = "border 0.3s, background-color 0.3s";
             element.style.border = "2px solid #2ecc71"; 
-            element.style.transition = "border 0.3s";
-            setTimeout(() => { element.style.border = "1px solid #ced4da"; }, 1500);
+            element.style.backgroundColor = "#e8f8f5"; 
+            setTimeout(() => { 
+                element.style.border = "1px solid #ced4da"; 
+                element.style.backgroundColor = ""; 
+            }, 1500);
         }
 
-        // --- 2. Run Main Analysis ---
+        // --- 2. Run Main Analysis (With Red/Green Flag Logic) ---
         async function runAnalysis() {
+            // Get inputs
+            const crop = document.getElementById('crop_type').value;
+            const region = document.getElementById('region').value;
+
             // Validate ALL inputs are present
             if(document.getElementById('temperature').value === "") {
                 alert("Please enter a city and click Search to get weather data first!");
                 return;
             }
-            if(document.getElementById('crop_type').value === "") {
-                alert("Please select a Crop.");
+            if(!crop || !region) {
+                alert("Please select both a Crop and a Region.");
                 return;
             }
             if(document.getElementById('soil_type').value === "") {
                 alert("Please select a Soil Type.");
-                return;
-            }
-            if(document.getElementById('region').value === "") {
-                alert("Please select a Region (or search a city).");
                 return;
             }
             if(document.getElementById('soil_condition').value === "") {
@@ -323,17 +370,49 @@
                 return;
             }
 
+            // --- 🚩 NEW: SUITABILITY CHECK LOGIC ---
+            // This creates the Red/Green flag HTML
+            let warningHTML = "";
+            if (CROP_DATA[crop] && CROP_DATA[crop].suitability) {
+                const suit = CROP_DATA[crop].suitability;
+                
+                if (suit.unsuitable.includes(region)) {
+                    // ❌ RED FLAG
+                    warningHTML = `
+                        <div class="alert alert-danger mt-3 border-danger">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>CRITICAL WARNING</strong><br>
+                            ${crop} is <u>NOT SUITABLE</u> for ${region}.<br>
+                            <small>Growth failure is highly likely.</small>
+                        </div>`;
+                } else if (suit.marginal.includes(region)) {
+                    // ⚠️ YELLOW FLAG
+                    warningHTML = `
+                        <div class="alert alert-warning mt-3 border-warning">
+                            <i class="fas fa-info-circle"></i> <strong>Caution</strong><br>
+                            ${region} is a marginal region for ${crop}. Yield may be lower.
+                        </div>`;
+                } else {
+                    // ✅ GREEN FLAG
+                    warningHTML = `
+                        <div class="alert alert-success mt-3 border-success">
+                            <i class="fas fa-check-circle"></i> <strong>Excellent Match</strong><br>
+                            ${region} is an ideal region for growing ${crop}.
+                        </div>`;
+                }
+            }
+            // ------------------------------------------
+
             const baseData = {
-                crop_type: document.getElementById('crop_type').value,
+                crop_type: crop,
                 soil_type: document.getElementById('soil_type').value,
-                region: document.getElementById('region').value,
+                region: region,
                 soil_condition: document.getElementById('soil_condition').value,
                 crop_age: document.getElementById('crop_age').value,
-                temperature: document.getElementById('temperature').value,
-                humidity: document.getElementById('humidity').value,
-                rainfall: document.getElementById('rainfall').value,
-                wind_speed: document.getElementById('wind_speed').value,
-                weather_condition: document.getElementById('weather_condition').value
+                temperature: document.getElementById('temperature').value || 25,
+                humidity: document.getElementById('humidity').value || 50,
+                rainfall: document.getElementById('rainfall').value || 0,
+                wind_speed: document.getElementById('wind_speed').value || 5,
+                weather_condition: document.getElementById('weather_condition').value || "Sunny"
             };
 
             try {
@@ -363,7 +442,10 @@
                 }
 
                 document.getElementById('resAmount').innerText = result.water_amount;
-                document.getElementById('resAdvice').innerText = result.advice;
+                
+                // 👇 INSERT THE WARNING FLAG HERE 👇
+                document.getElementById('resAdvice').innerHTML = result.advice + warningHTML;
+                
                 document.getElementById('cropFactText').innerText = result.crop_fact;
                 
                 // Bars
@@ -430,6 +512,9 @@
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btnElement.disabled = true;
 
+            // Also get the current region to save it to the backend for the Dashboard flag
+            const regionVal = document.getElementById('region').value;
+
             fetch('/scheduler/add_task', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -437,7 +522,8 @@
                     date: dateStr,
                     time: "06:00", 
                     crop: cropName,
-                    amount: amount
+                    amount: amount,
+                    region: regionVal // Pass region so backend can save the flag
                 })
             })
             .then(res => res.json())

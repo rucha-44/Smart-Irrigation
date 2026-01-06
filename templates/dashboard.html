@@ -8,7 +8,21 @@
     <style>
         body { background-color: #f4f6f9; }
         .dashboard-header { background: #2c3e50; color: white; padding: 15px; border-radius: 8px; }
-        .warning-box { font-size: 0.85em; color: #dc3545; display: none; margin-top: 5px; font-weight: bold; }
+        
+        /* Custom Warning Box Styles */
+        .warning-box { 
+            font-size: 0.9em; 
+            display: none; 
+            margin-top: 8px; 
+            padding: 8px 12px;
+            border-radius: 5px;
+            border-left: 5px solid;
+        }
+        .warn-red { background-color: #f8d7da; border-color: #dc3545; color: #842029; }
+        .warn-yellow { background-color: #fff3cd; border-color: #ffc107; color: #664d03; }
+        .warn-green { background-color: #d1e7dd; border-color: #198754; color: #0f5132; }
+
+        .card:hover { transform: translateY(-3px); transition: 0.3s; }
     </style>
 </head>
 <body>
@@ -16,7 +30,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4 px-3">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="#">
-            <i class="fas fa-tractor"></i> Smart Farm
+            <i class="fas fa-tractor"></i> AgriAssist
         </a>
         
         <div class="d-flex align-items-center">
@@ -24,12 +38,8 @@
                 <i class="fas fa-calendar-alt"></i> My Planner
             </a>
 
-            <a href="/profile" class="btn btn-outline-light btn-sm me-2">
-                <i class="fas fa-user"></i> Profile
-            </a>
-
             <a href="/logout" class="btn btn-danger btn-sm">
-                <i class="fas fa-power-off"></i>
+                <i class="fas fa-power-off"></i> Logout
             </a>
         </div>
     </div>
@@ -37,8 +47,8 @@
 
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>My Active Fields</h3>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCropModal">
+        <h3><i class="fas fa-seedling text-success"></i> My Active Fields</h3>
+        <button class="btn btn-success shadow" data-bs-toggle="modal" data-bs-target="#addCropModal">
             <i class="fas fa-plus"></i> Add New Field
         </button>
     </div>
@@ -48,18 +58,30 @@
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm h-100 border-start border-5 border-{{ crop.color }}">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h5 class="card-title fw-bold text-success">{{ crop.name }}</h5>
-                        <span class="badge bg-{{ crop.color }}">{{ crop.age }} Days</span>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title fw-bold text-success mb-0">{{ crop.name }}</h5>
+                            <small class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ crop.city }}</small>
+                        </div>
+                        
+                        {% if crop.viability == 'Unsuitable' %}
+                            <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Not Suitable</span>
+                        {% elif crop.viability == 'Marginal' %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-circle"></i> Marginal</span>
+                        {% else %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Ideal</span>
+                        {% endif %}
                     </div>
                     
-                    <p class="text-muted small mb-2">
-                        <i class="fas fa-map-marker-alt"></i> {{ crop.city }} &nbsp;|&nbsp; 
-                        <i class="fas fa-layer-group"></i> {{ crop.soil_type }}
-                    </p>
+                    <hr class="my-2">
                     
-                    <p class="small text-{{ crop.color }} fw-bold mb-3">
-                        {{ crop.advice }}
+                    <div class="d-flex justify-content-between small text-muted mb-3">
+                        <span><i class="fas fa-layer-group"></i> {{ crop.soil_type }}</span>
+                        <span class="fw-bold text-dark">{{ crop.age }} Days Old</span>
+                    </div>
+                    
+                    <p class="small text-{{ crop.color }} fw-bold mb-3 p-2 bg-light rounded">
+                        <i class="fas fa-info-circle"></i> {{ crop.advice }}
                     </p>
 
                     <a href="/?source=dashboard&crop={{ crop.name }}&city={{ crop.city }}&soil={{ crop.soil_type }}&age={{ crop.age }}" 
@@ -70,10 +92,13 @@
             </div>
         </div>
         {% else %}
-        <div class="col-12 text-center py-5 text-muted">
-            <i class="fas fa-seedling fa-3x mb-3"></i>
+        <div class="col-12 text-center py-5 text-muted bg-white rounded shadow-sm">
+            <i class="fas fa-seedling fa-4x mb-3 text-success opacity-50"></i>
             <h4>No active crops found.</h4>
-            <p>Add a field to start monitoring.</p>
+            <p>Add a field to start monitoring your farm.</p>
+            <button class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#addCropModal">
+                Register First Crop
+            </button>
         </div>
         {% endfor %}
     </div>
@@ -82,15 +107,15 @@
 <div class="modal fade" id="addCropModal" tabindex="-1">
     <div class="modal-dialog">
         <form class="modal-content" action="/add_crop" method="POST">
-            <div class="modal-header">
-                <h5 class="modal-title">Register New Field</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-plus-circle"></i> Register New Field</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 
                 <div class="mb-3">
-                    <label>Crop Name</label>
-                    <select name="crop_name" id="modalCrop" class="form-select" required onchange="validateModal()">
+                    <label class="fw-bold">Crop Name</label>
+                    <select name="crop_name" id="modalCrop" class="form-select" required onchange="validateModalWithSuitability()">
                         <option value="" disabled selected>-- Select --</option>
                         {% for crop_name in crop_data %}
                         <option value="{{ crop_name }}">{{ crop_name }}</option>
@@ -99,18 +124,20 @@
                 </div>
 
                 <div class="mb-3">
-                    <label>City (For Weather)</label>
-                    <div class="input-group">
-                        <input type="text" name="city" id="modalCity" class="form-control" placeholder="e.g. Pune" required onblur="checkModalRegion()">
-                        <button type="button" class="btn btn-outline-secondary" onclick="checkModalRegion()">Check</button>
-                    </div>
-                    <div id="regionWarning" class="warning-box"></div>
-                    <small id="detectedRegion" class="text-muted" style="display:none"></small>
-                </div>
-
+    <label class="fw-bold">City (Location)</label>
+    <div class="input-group">
+        <input type="text" name="city" id="modalCity" class="form-control" placeholder="e.g. Pune" required onblur="checkModalRegion()">
+        <button type="button" class="btn btn-outline-secondary" onclick="checkModalRegion()">Detect Region</button>
+    </div>
+    
+    <input type="hidden" name="region" id="hiddenRegion"> 
+    
+    <small id="detectedRegion" class="text-primary fw-bold mt-1 d-block" style="display:none;"></small>
+    <div id="regionWarning" class="warning-box"></div>
+</div>
                 <div class="mb-3">
-                    <label>Soil Type</label>
-                    <select name="soil_type" id="modalSoil" class="form-select" required onchange="validateModal()">
+                    <label class="fw-bold">Soil Type</label>
+                    <select name="soil_type" id="modalSoil" class="form-select" required onchange="validateModalWithSuitability()">
                         <option value="Clayey">Clayey</option>
                         <option value="Loamy">Loamy</option>
                         <option value="Sandy">Sandy</option>
@@ -118,15 +145,16 @@
                         <option value="Peaty">Peaty</option>
                         <option value="Chalky">Chalky</option>
                     </select>
-                    <div id="soilWarning" class="warning-box"></div>
+                    <div id="soilWarning" class="warning-box warn-red"></div>
                 </div>
 
                 <div class="mb-3">
-                    <label>Date of Sowing</label>
+                    <label class="fw-bold">Date of Sowing</label>
                     <input type="date" name="sowing_date" class="form-control" required>
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-success">Save Field</button>
             </div>
         </form>
@@ -138,8 +166,9 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    // --- Load Rules from Server ---
+    // --- 1. Load Data ---
     let CROP_DATA = {};
     try {
         CROP_DATA = JSON.parse(document.getElementById('crop-data-source').textContent);
@@ -147,15 +176,18 @@
 
     let currentRegion = "";
 
-    // --- Region Detection Logic ---
-    async function checkModalRegion() {
+    // --- 2. Region Detection ---
+   async function checkModalRegion() {
         const city = document.getElementById('modalCity').value;
         const regionLabel = document.getElementById('detectedRegion');
+        const hiddenInput = document.getElementById('hiddenRegion'); // <--- Select it
+        const btn = document.querySelector('.input-group button');
         
         if(!city) return;
 
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
         try {
-            // Ask server to detect region for this city
             const res = await fetch('/get_weather', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -165,46 +197,62 @@
             
             if(data.detected_region) {
                 currentRegion = data.detected_region;
+                
+                // 👇 SAVE IT TO HIDDEN INPUT 👇
+                hiddenInput.value = currentRegion; 
+                
                 regionLabel.style.display = 'block';
-                regionLabel.innerText = `Detected Region: ${currentRegion}`;
-                validateModal(); // Re-validate with new region
+                regionLabel.innerHTML = `<i class="fas fa-map-pin"></i> Region Detected: ${currentRegion}`;
+                
+                validateModalWithSuitability(); 
             }
         } catch(e) { console.error(e); }
+        
+        btn.innerHTML = 'Detect Region';
     }
-
-    // --- Validation Logic (The Warning System) ---
-    function validateModal() {
+    // --- 3. The New 3-Level Validation Logic ---
+    function validateModalWithSuitability() {
         const crop = document.getElementById('modalCrop').value;
         const soil = document.getElementById('modalSoil').value;
         
-        const soilWarn = document.getElementById('soilWarning');
         const regionWarn = document.getElementById('regionWarning');
-        const soilInput = document.getElementById('modalSoil');
-        const cityInput = document.getElementById('modalCity');
+        const soilWarn = document.getElementById('soilWarning');
 
         if (!crop || !CROP_DATA[crop]) return;
+        
         const rules = CROP_DATA[crop];
+        const suit = rules.suitability; // Access the suitability object
 
-        // 1. Validate Soil
+        // --- A. SOIL CHECK ---
         if (rules.ideal_soil && !rules.ideal_soil.includes(soil)) {
-            soilInput.style.border = "2px solid #dc3545"; // Red Border
             soilWarn.style.display = "block";
-            soilWarn.innerText = `⚠️ ${crop} grows poorly in ${soil} soil. Ideal: ${rules.ideal_soil.join(', ')}`;
+            soilWarn.innerText = `⚠️ ${crop} prefers ${rules.ideal_soil.join(', ')} soil. Current: ${soil}`;
         } else {
-            soilInput.style.border = "1px solid #ced4da"; // Reset
             soilWarn.style.display = "none";
         }
 
-        // 2. Validate Region (If we know it)
-        if (currentRegion && rules.ideal_regions && rules.ideal_regions[0] !== 'All') {
-            if (!rules.ideal_regions.includes(currentRegion)) {
-                cityInput.style.border = "2px solid #dc3545"; // Red Border
-                regionWarn.style.display = "block";
-                regionWarn.innerText = `⚠️ ${currentRegion} is not optimal for ${crop}. Ideal: ${rules.ideal_regions.join(', ')}`;
-            } else {
-                cityInput.style.border = "1px solid #ced4da"; // Reset
-                regionWarn.style.display = "none";
+        // --- B. REGION CHECK (Red/Yellow/Green) ---
+        if (currentRegion && suit) {
+            regionWarn.style.display = "block";
+            regionWarn.className = "warning-box"; // Reset classes
+
+            if (suit.unsuitable.includes(currentRegion)) {
+                // ❌ RED: Unsuitable
+                regionWarn.classList.add("warn-red");
+                regionWarn.innerHTML = `<i class="fas fa-times-circle"></i> <strong>Critical:</strong> ${crop} does NOT grow naturally in ${currentRegion}.`;
+            } 
+            else if (suit.marginal.includes(currentRegion)) {
+                // ⚠️ YELLOW: Marginal
+                regionWarn.classList.add("warn-yellow");
+                regionWarn.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> ${currentRegion} is a marginal region. Yield may be lower.`;
+            } 
+            else {
+                // ✅ GREEN: Ideal
+                regionWarn.classList.add("warn-green");
+                regionWarn.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Great Match:</strong> ${currentRegion} is ideal for ${crop}.`;
             }
+        } else {
+            regionWarn.style.display = "none";
         }
     }
 </script>

@@ -28,17 +28,17 @@ class NotificationService:
             print(f"❌ OTP Failed: {e}")
             return False
         
-        
+
     def __init__(self):
         # 1. Credentials
         self.account_sid = "AC677aaad61269a1079aeddaba8f2a428a" 
-        self.auth_token = "ea2a9be5f3bc5f78518ec2f55de1b37a"  # <--- PASTE YOUR TOKEN
+        self.auth_token = "ea2a9be5f3bc5f78518ec2f55de1b37a"
         
         # 2. Config
         self.from_whatsapp = "whatsapp:+14155238886" 
         
         # ⚠️ YOUR NEW TEMPLATE ID (irrigationalert)
-        self.content_sid = "HX4a3c0e2cfad2ae05fca3dfa261287bdf" 
+        self.content_sid = "HX4a3c0e2cfad2ae05fca3dfa261287bdf"
 
         try:
             self.client = Client(self.account_sid, self.auth_token)

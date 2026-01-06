@@ -8,3 +8,6 @@ __pycache__/
 *.pt
 *.pth
 .DS_Store
+
+# 🔒 SECURITY: Ignore environment variables
+.env
